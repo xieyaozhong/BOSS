@@ -1,0 +1,265 @@
+<!doctype html>
+<html lang="zh-Hant">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#f3efe6" />
+    <title>BOSS｜把能力變成作品</title>
+    <meta name="description" content="把音樂、繪畫、程式、外語與人脈放進同一套每日精進系統。每天一條主線，留下合理而看得見的產出。" />
+    <meta property="og:type" content="website" />
+    <meta property="og:locale" content="zh_TW" />
+    <meta property="og:title" content="BOSS｜把能力變成作品" />
+    <meta property="og:description" content="五種能力，一個每日精進入口。" />
+    <meta property="og:url" content="https://xieyaozhong.github.io/BOSS/" />
+    <meta property="og:image" content="https://xieyaozhong.github.io/BOSS/assets/og.png" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="BOSS｜把能力變成作品" />
+    <meta name="twitter:description" content="五種能力，一個每日精進入口。" />
+    <meta name="twitter:image" content="https://xieyaozhong.github.io/BOSS/assets/og.png" />
+    <link rel="manifest" href="./manifest.webmanifest" />
+    <link rel="stylesheet" href="./assets/styles.css" />
+  </head>
+  <body>
+    <a class="skip-link" href="#today">跳到今日任務</a>
+
+    <header class="topbar">
+      <a class="brand" href="#top" aria-label="BOSS 首頁">
+        <span class="brand-mark">BOSS</span>
+        <span class="brand-subtitle">能力作業系統</span>
+      </a>
+      <nav class="nav" aria-label="主要導覽">
+        <a href="#today">今日</a>
+        <a href="#skills">能力</a>
+        <a href="#outputs">產出</a>
+        <a href="#system">系統</a>
+      </nav>
+      <button class="text-button topbar-action" type="button" data-open-profile>校準能力</button>
+    </header>
+
+    <main id="top">
+      <section class="hero" aria-labelledby="hero-title">
+        <div class="hero-intro">
+          <p class="eyebrow"><span class="live-dot"></span>DAILY PRACTICE · VISIBLE OUTPUT</p>
+          <h1 id="hero-title">今天，把能力<br />變成一個作品。</h1>
+          <p class="hero-copy">音樂、繪畫、程式、外語、人脈，不必同時衝刺。每天選一條主線，留下能被看見、保存或分享的成果。</p>
+        </div>
+
+        <aside class="hero-status" aria-label="今天的系統狀態">
+          <div class="status-date">
+            <span id="weekday-label">TODAY</span>
+            <strong id="date-number">01</strong>
+            <small id="month-label">SEP 2026</small>
+          </div>
+          <div class="status-row">
+            <span>每日預算</span>
+            <strong id="daily-budget">45 min</strong>
+          </div>
+          <div class="status-row">
+            <span>連續產出</span>
+            <strong id="streak-count">0 days</strong>
+          </div>
+          <div class="status-row">
+            <span>本週完成</span>
+            <strong id="week-output-count">0 / 5</strong>
+          </div>
+        </aside>
+      </section>
+
+      <section id="today" class="today-layout section-block" aria-labelledby="focus-title">
+        <article class="focus-card">
+          <div class="focus-head">
+            <div>
+              <p class="section-label">TODAY'S MAIN QUEST</p>
+              <p class="focus-meta"><span id="focus-index">01</span> / <span id="focus-duration">45 分鐘</span></p>
+            </div>
+            <button class="icon-button" id="reroll-plan" type="button" aria-label="換一個今日任務" title="換一個今日任務">↻</button>
+          </div>
+
+          <div class="focus-body">
+            <div class="focus-tags" id="focus-tags" aria-label="涉及能力"></div>
+            <h2 id="focus-title">正在載入今天的主線…</h2>
+            <p class="focus-reason" id="focus-reason">系統正在依照能力差距、輪替節奏與時間預算整理今天最值得做的一件事。</p>
+            <ol class="task-steps" id="task-steps" aria-label="今日任務步驟"></ol>
+            <div class="deliverable">
+              <div>
+                <span class="deliverable-label">今天的最小可交付成果</span>
+                <strong id="deliverable-title">一個能保存的微型作品</strong>
+              </div>
+              <p id="deliverable-done">完成條件載入中</p>
+            </div>
+          </div>
+
+          <div class="focus-actions">
+            <button class="primary-button" id="start-focus" type="button">開始專注</button>
+            <button class="secondary-button" id="complete-focus" type="button">完成並留下證據</button>
+            <span class="timer" id="focus-timer" aria-label="專注計時">00:00</span>
+          </div>
+        </article>
+
+        <div class="today-side">
+          <article class="side-card maintain-card">
+            <p class="section-label">MAINTAIN · 不讓其他能力掉線</p>
+            <span class="side-kicker" id="maintain-skill">維持練習</span>
+            <h3 id="maintain-title">10 分鐘的小練習</h3>
+            <p id="maintain-copy">每天只需要維持一項次要能力，不追求完整作品。</p>
+            <label class="mini-check"><input id="maintain-check" type="checkbox" /> <span>今天有做到</span></label>
+          </article>
+
+          <article class="side-card network-card">
+            <p class="section-label" id="network-label">ONE HUMAN STEP · 5 MIN</p>
+            <div class="network-symbol" aria-hidden="true"><span></span><span></span><span></span></div>
+            <h3 id="network-title">分享一個真正有用的東西</h3>
+            <p id="network-copy">想起一個最近可能用得上的人，附上一句為什麼適合他。不必公開姓名。</p>
+            <label class="mini-check"><input id="network-check" type="checkbox" /> <span>已完成這一步</span></label>
+          </article>
+
+          <article class="side-card rhythm-card">
+            <div class="rhythm-head">
+              <div>
+                <p class="section-label">THIS WEEK</p>
+                <h3>產出節奏</h3>
+              </div>
+              <strong id="rhythm-total">0m</strong>
+            </div>
+            <div class="week-bars" id="week-bars" aria-label="本週每日投入分鐘"></div>
+          </article>
+        </div>
+      </section>
+
+      <section id="skills" class="skills-section section-block" aria-labelledby="skills-title">
+        <div class="section-heading">
+          <div>
+            <p class="section-label dark-label">CAPABILITY MAP</p>
+            <h2 id="skills-title">五條長期複利的路</h2>
+          </div>
+          <div class="heading-actions">
+            <p>程度只是起點，<br />里程碑與作品才是證據。</p>
+            <button class="secondary-button dark-button" type="button" data-open-profile>調整我的現況</button>
+          </div>
+        </div>
+
+        <div class="calibration-note" id="calibration-note" role="status">
+          <div><span>2 MIN SETUP</span><strong>先校準目前程度，建議會更貼近你。</strong></div>
+          <button class="text-button" type="button" data-open-profile>現在校準 →</button>
+        </div>
+        <div class="skill-grid" id="skill-grid" aria-live="polite"></div>
+      </section>
+
+      <section id="outputs" class="outputs-section section-block" aria-labelledby="outputs-title">
+        <div class="section-heading output-heading">
+          <div>
+            <p class="section-label dark-label">OUTPUT, NOT BUSYWORK</p>
+            <h2 id="outputs-title">合理的產出，<br />要小到今天能完成。</h2>
+          </div>
+          <p class="output-principle">每個任務都有明確完成條件：能保存、能展示、能交給未來的自己繼續做。</p>
+        </div>
+
+        <div class="output-layout">
+          <div class="output-ladder" aria-label="時間與產出尺度">
+            <article>
+              <span>15—30 MIN</span><strong>片段</strong>
+              <p>一頁速寫、八小節、六句口說、一次有內容的聯繫。</p>
+            </article>
+            <article>
+              <span>45—60 MIN</span><strong>微型作品</strong>
+              <p>一個可操作小工具、一張小插畫、一段完整錄音或雙語摘要。</p>
+            </article>
+            <article>
+              <span>90+ MIN</span><strong>可發布版本</strong>
+              <p>整理、包裝、補上說明，讓成果能被別人看懂與使用。</p>
+            </article>
+          </div>
+
+          <div class="recent-output-panel">
+            <div class="panel-head">
+              <div><p class="section-label dark-label">YOUR LOG</p><h3>最近完成</h3></div>
+              <button class="text-button" id="export-data" type="button">匯出備份</button>
+            </div>
+            <div class="empty-output" id="empty-output">
+              <span>Ø</span>
+              <p>第一個完成紀錄會出現在這裡。<br />不是沒進步，只是還沒留下作品。</p>
+            </div>
+            <div class="output-list" id="output-list"></div>
+          </div>
+        </div>
+      </section>
+
+      <section id="system" class="system-section section-block" aria-labelledby="system-title">
+        <div class="system-copy">
+          <p class="section-label">HOW IT WORKS</p>
+          <h2 id="system-title">每天自動生成，<br />但方向仍由你掌舵。</h2>
+          <p>系統每天依照目標差距、優先權、最近完成紀錄與輪替節奏，選出一個主線、一道維持練習與一個人脈小步。總時間不超過你設定的預算；如果今天狀態不同，也能手動換成另一個同尺度任務。</p>
+        </div>
+        <ol class="system-flow">
+          <li><span>01</span><div><strong>校準</strong><p>設定程度、目標與每天可用時間。</p></div></li>
+          <li><span>02</span><div><strong>執行</strong><p>今天只做一個最小可交付成果。</p></div></li>
+          <li><span>03</span><div><strong>留下證據</strong><p>記錄時間、作品連結與一句反思。</p></div></li>
+          <li><span>04</span><div><strong>再平衡</strong><p>下一天的任務會依完成情況調整。</p></div></li>
+        </ol>
+        <div class="privacy-note">
+          <strong>隱私界線</strong>
+          <p>這是公開的 GitHub Pages。公開檔案不放姓名、聯絡方式或私人互動；完成紀錄預設存在瀏覽器，但同一個 <code>xieyaozhong.github.io</code> 網域的其他頁面也可能讀到它。請勿填入他人個資，敏感紀錄請另存於可信任的私人空間。</p>
+        </div>
+      </section>
+    </main>
+
+    <footer>
+      <div><strong>BOSS</strong><span>Build · Observe · Sharpen · Share</span></div>
+      <p>每天 06:17 · Asia/Taipei 自動更新</p>
+      <a href="https://github.com/xieyaozhong/BOSS" target="_blank" rel="noreferrer">GitHub ↗</a>
+    </footer>
+
+    <dialog class="dialog" id="profile-dialog" aria-labelledby="profile-title">
+      <form method="dialog" class="dialog-shell" id="profile-form">
+        <div class="dialog-head">
+          <div><p class="section-label dark-label">CALIBRATE</p><h2 id="profile-title">校準我的能力</h2></div>
+          <button class="icon-button light-icon" type="button" data-close-profile aria-label="關閉">×</button>
+        </div>
+        <div class="profile-basics">
+          <label>每天可用時間
+            <select id="daily-minutes" name="dailyMinutes"><option value="30">30 分鐘</option><option value="45">45 分鐘</option><option value="60">60 分鐘</option><option value="90">90 分鐘</option></select>
+          </label>
+          <label>每週想留下
+            <select id="weekly-target" name="weeklyTarget"><option value="3">3 個產出</option><option value="5">5 個產出</option><option value="7">7 個產出</option></select>
+          </label>
+        </div>
+        <div class="profile-skill-list" id="profile-skill-list"></div>
+        <div class="dialog-actions">
+          <div class="data-actions">
+            <label class="import-label" tabindex="0">匯入備份<input id="import-data" type="file" accept="application/json" /></label>
+            <button class="text-button danger-text" id="clear-data" type="button">清除 BOSS 本機資料</button>
+          </div>
+          <div>
+            <button class="secondary-button dark-button" value="cancel" type="button" data-close-profile>取消</button>
+            <button class="primary-button" value="default" type="submit">儲存並重新生成</button>
+          </div>
+        </div>
+      </form>
+    </dialog>
+
+    <dialog class="dialog" id="checkin-dialog" aria-labelledby="checkin-title">
+      <form method="dialog" class="dialog-shell checkin-form" id="checkin-form">
+        <div class="dialog-head">
+          <div><p class="section-label dark-label">LEAVE EVIDENCE</p><h2 id="checkin-title">完成今天的產出</h2></div>
+          <button class="icon-button light-icon" type="button" data-close-checkin aria-label="關閉">×</button>
+        </div>
+        <label>成果名稱（請勿填入他人姓名）<input id="checkin-name" name="name" required maxlength="80" /></label>
+        <div class="two-fields">
+          <label>實際投入<input id="checkin-minutes" name="minutes" type="number" min="1" max="600" required /><span>分鐘</span></label>
+          <label>體感難度<select id="checkin-difficulty" name="difficulty"><option value="2">太簡單</option><option value="3" selected>剛剛好</option><option value="4">有挑戰</option><option value="5">太困難</option></select></label>
+        </div>
+        <label>作品或證據連結（可留空）<input id="checkin-url" name="url" type="url" maxlength="2048" placeholder="https://…" /></label>
+        <label>一句反思<textarea id="checkin-note" name="note" rows="3" maxlength="240" placeholder="只寫自己的收穫；不要貼私人對話或聯絡資料。"></textarea></label>
+        <p class="form-privacy">不會自動公開，但瀏覽器儲存是同網域共用；敏感內容請不要填在這裡。</p>
+        <div class="dialog-actions checkin-actions">
+          <button class="secondary-button dark-button" value="cancel" type="button" data-close-checkin>稍後再說</button>
+          <button class="primary-button" value="default" type="submit">保存完成紀錄</button>
+        </div>
+      </form>
+    </dialog>
+
+    <div class="toast" id="toast" role="status" aria-live="polite"></div>
+    <noscript>這個入口需要 JavaScript 才能產生每日建議與保存完成紀錄。</noscript>
+    <script type="module" src="./assets/app.js"></script>
+  </body>
+</html>

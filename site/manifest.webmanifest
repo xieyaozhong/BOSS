@@ -1,0 +1,10 @@
+{
+  "name": "BOSS 能力作業系統",
+  "short_name": "BOSS",
+  "start_url": "./",
+  "display": "standalone",
+  "background_color": "#f3efe6",
+  "theme_color": "#f3efe6",
+  "lang": "zh-Hant",
+  "description": "每天把能力變成一個作品。"
+}

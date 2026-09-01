@@ -1,0 +1,176 @@
+{
+  "version": 1,
+  "profile": {
+    "displayName": "我的能力基地",
+    "locale": "zh-TW",
+    "timezone": "Asia/Taipei",
+    "dailyMinutes": 45,
+    "weeklyOutputTarget": 5,
+    "publicMode": true
+  },
+  "recommendation": {
+    "maxDailyItems": 3,
+    "allowCrossSkill": true,
+    "maxCrossSkillPerWeek": 2
+  },
+  "skills": [
+    {
+      "id": "music",
+      "name": "音樂",
+      "englishName": "MUSIC",
+      "color": "#f0c85a",
+      "currentLevel": 2,
+      "targetLevel": 4,
+      "priority": 4,
+      "calibrated": false,
+      "strengths": [],
+      "currentGoal": "把聽見的想法快速做成一段可回放的聲音",
+      "nextMilestone": "完成一段 30–60 秒、具有開頭與結尾的錄音",
+      "directions": [
+        "節奏穩定與律動辨識",
+        "和聲進行與旋律發展",
+        "快速錄音與基礎混音",
+        "拆解喜歡作品的編曲選擇"
+      ],
+      "practicePool": [
+        {"title": "節拍校準", "detail": "用節拍器把同一段節奏從慢速到原速錄兩次，比較哪裡開始不穩。"},
+        {"title": "四小節變奏", "detail": "選一段熟悉旋律，只改節奏或結尾，做出兩個版本。"},
+        {"title": "聽寫一個層次", "detail": "挑一首歌，只記錄鼓、貝斯或和聲在 30 秒內的變化。"}
+      ],
+      "outputPool": [
+        {"difficulty": 2, "minMinutes": 18, "directionIndex": 2, "title": "30 秒聲音明信片", "brief": "用一個情緒或今天的環境聲做出短片段。", "doneWhen": "匯出一個 30–60 秒音檔，檔名含日期，並寫下一句創作選擇。"},
+        {"difficulty": 3, "minMinutes": 28, "directionIndex": 1, "title": "八小節編曲片段", "brief": "完成主旋律、低音與一個節奏層。", "doneWhen": "八小節能從頭播放到尾，沒有空白段，並輸出試聽檔。"},
+        {"difficulty": 2, "minMinutes": 18, "directionIndex": 3, "title": "一首歌的結構地圖", "brief": "把喜歡的歌拆成時間軸，標出段落與能量變化。", "doneWhen": "完成一張含時間碼、段落名稱與三個觀察的結構圖。"}
+      ]
+    },
+    {
+      "id": "art",
+      "name": "繪畫",
+      "englishName": "VISUAL ART",
+      "color": "#ff9c74",
+      "currentLevel": 2,
+      "targetLevel": 4,
+      "priority": 4,
+      "calibrated": false,
+      "strengths": [],
+      "currentGoal": "用更少線條抓住形體、光影與畫面重點",
+      "nextMilestone": "完成一張有明確明暗層次的小型插畫",
+      "directions": [
+        "輪廓、比例與負形觀察",
+        "光影分組與空間感",
+        "構圖縮圖與視線引導",
+        "限制色盤下的色彩選擇"
+      ],
+      "practicePool": [
+        {"title": "六格構圖縮圖", "detail": "同一主題畫六個黑白小構圖，每格只用三種明度。"},
+        {"title": "負形速寫", "detail": "不畫物體本身，只畫物體周圍的空白形狀，完成三張。"},
+        {"title": "兩值光影", "detail": "把一張參考圖簡化成亮、暗兩塊，避免細節。"}
+      ],
+      "outputPool": [
+        {"difficulty": 2, "minMinutes": 18, "directionIndex": 0, "title": "一頁觀察速寫", "brief": "以同一物件做六個角度或姿勢。", "doneWhen": "一頁至少有六格，圈出最準的一格並寫下一個要修正的地方。"},
+        {"difficulty": 3, "minMinutes": 28, "directionIndex": 3, "title": "三色小插畫", "brief": "只用三種顏色完成有前後層次的畫面。", "doneWhen": "輸出一張完整圖片，主體、背景與光源都可辨識。"},
+        {"difficulty": 2, "minMinutes": 18, "directionIndex": 1, "title": "光影臨摹卡", "brief": "選一張照片，先做黑白分組再補一層中間調。", "doneWhen": "保存參考圖與完成圖，並標記最亮與最暗區域。"}
+      ]
+    },
+    {
+      "id": "code",
+      "name": "程式",
+      "englishName": "PROGRAMMING",
+      "color": "#8fb6ff",
+      "currentLevel": 2,
+      "targetLevel": 4,
+      "priority": 5,
+      "calibrated": false,
+      "strengths": [],
+      "currentGoal": "把重複問題變成可使用、可說明的小工具",
+      "nextMilestone": "完成一個有說明、錯誤處理與展示畫面的微型工具",
+      "directions": [
+        "需求切片與最小可行版本",
+        "測試、錯誤處理與可維護性",
+        "資料結構與自動化流程",
+        "清楚文件與可展示的介面"
+      ],
+      "practicePool": [
+        {"title": "一函式一測試", "detail": "挑一個常用函式，補一個正常案例與一個邊界案例。"},
+        {"title": "十分鐘重構", "detail": "找一段重複邏輯，抽成名稱清楚的小函式並重新執行。"},
+        {"title": "讀一段原始碼", "detail": "追一個功能從入口到輸出，寫下三個關鍵節點。"}
+      ],
+      "outputPool": [
+        {"difficulty": 2, "minMinutes": 18, "directionIndex": 2, "title": "一個能省五分鐘的小工具", "brief": "把今天遇到的一個重複動作自動化。", "doneWhen": "工具可執行一次成功案例，並有三行使用說明。"},
+        {"difficulty": 3, "minMinutes": 24, "directionIndex": 1, "title": "修好一個明確問題", "brief": "重現、修復並留下最小測試。", "doneWhen": "修復前可重現，修復後通過，並記錄原因與驗證方式。"},
+        {"difficulty": 3, "minMinutes": 28, "directionIndex": 3, "title": "一頁互動原型", "brief": "把一個想法做成可點擊、可輸入或可切換的頁面。", "doneWhen": "核心互動可在手機寬度使用，並保存一張截圖。"}
+      ]
+    },
+    {
+      "id": "language",
+      "name": "外語",
+      "englishName": "LANGUAGE",
+      "color": "#b9a4ff",
+      "currentLevel": 2,
+      "targetLevel": 4,
+      "priority": 4,
+      "calibrated": false,
+      "strengths": [],
+      "currentGoal": "從被動理解走向能自然說明自己的工作與興趣",
+      "nextMilestone": "完成一段 90 秒、不看逐字稿的主題口說",
+      "directions": [
+        "高頻語塊與情境反應",
+        "輸出導向的聽讀輸入",
+        "發音、節奏與口說錄音",
+        "用外語整理自己的專業內容"
+      ],
+      "practicePool": [
+        {"title": "六句影子跟讀", "detail": "選 20–30 秒音訊，跟讀三輪，再用自己的語速錄一次。"},
+        {"title": "一段雙語摘要", "detail": "把今天看到的內容濃縮成母語三句、目標語三句。"},
+        {"title": "語塊替換", "detail": "選一個實用句型，替換主詞、時間與情境做五句。"}
+      ],
+      "outputPool": [
+        {"difficulty": 2, "minMinutes": 18, "directionIndex": 2, "title": "90 秒口說日誌", "brief": "用目標語說明今天做了什麼、卡在哪裡、下一步是什麼。", "doneWhen": "錄滿 60–90 秒，只允許看三個提示詞，並記下一個要改的發音。"},
+        {"difficulty": 3, "minMinutes": 25, "directionIndex": 3, "title": "一則雙語作品說明", "brief": "替最近作品寫一段任何人都看得懂的介紹。", "doneWhen": "母語與目標語各 60–100 字，包含目的、做法與結果。"},
+        {"difficulty": 2, "minMinutes": 18, "directionIndex": 0, "title": "六句情境對話", "brief": "為一個真實場景寫出問答並朗讀。", "doneWhen": "完成至少三輪問答，朗讀錄音一次，標出兩個可重用語塊。"}
+      ]
+    },
+    {
+      "id": "network",
+      "name": "人脈",
+      "englishName": "NETWORK",
+      "color": "#7ccdb4",
+      "currentLevel": 2,
+      "targetLevel": 4,
+      "priority": 3,
+      "calibrated": false,
+      "strengths": [],
+      "currentGoal": "用持續、有價值的互動累積可信任的關係",
+      "nextMilestone": "每週完成兩次有內容的跟進或資源分享",
+      "directions": [
+        "主動關心與有內容的跟進",
+        "先提供價值再提出需求",
+        "讓合作邀請具體而低摩擦",
+        "定期維護弱連結與感謝紀錄"
+      ],
+      "practicePool": [
+        {"title": "一則真誠感謝", "detail": "具體說明對方哪個行動曾經幫到你，不附帶請求。"},
+        {"title": "分享一個資源", "detail": "挑一個真正適合對方近況的資源，加上一句選它的理由。"},
+        {"title": "低摩擦跟進", "detail": "把模糊的改天聊，改成一個可在 15 分鐘內回覆的具體問題。"}
+      ],
+      "outputPool": [
+        {"difficulty": 2, "minMinutes": 15, "directionIndex": 0, "title": "一次有價值的跟進", "brief": "延續過去的對話，帶上一個新資訊或可用資源。", "doneWhen": "送出一則包含脈絡、價值與低壓力下一步的訊息；網站只記完成，不記姓名。"},
+        {"difficulty": 3, "minMinutes": 25, "directionIndex": 2, "title": "一封具體合作小提案", "brief": "用最小範圍說明可以一起完成什麼。", "doneWhen": "提案包含共同目標、各自投入與一個 30 分鐘內能決定的下一步。"},
+        {"difficulty": 2, "minMinutes": 18, "directionIndex": 3, "title": "關係維護清單", "brief": "匿名盤點本月想關心的三種關係。", "doneWhen": "用角色代號列出三個關係與下一步，不放姓名或聯絡方式。"}
+      ]
+    }
+  ],
+  "crossSkillOutputs": [
+    {"primary": "code", "secondary": "language", "difficulty": 3, "minMinutes": 30, "directionIndex": 0, "title": "做一個外語句子收藏頁", "brief": "用程式做一頁能收藏五個句子的介面，每句補一個自己的例句。", "doneWhen": "頁面可新增或顯示五句內容，在手機寬度可使用，並保存一張截圖。"},
+    {"primary": "music", "secondary": "art", "difficulty": 3, "minMinutes": 32, "directionIndex": 2, "title": "替聲音做一張封面", "brief": "先完成 30 秒聲音片段，再用限制色盤做一張方形封面。", "doneWhen": "輸出音檔與 1080×1080 圖片，兩者使用同一個標題。"},
+    {"primary": "art", "secondary": "language", "difficulty": 3, "minMinutes": 28, "directionIndex": 2, "title": "做一張雙語視覺筆記", "brief": "把一個剛學會的概念畫成一頁，關鍵標籤使用目標語。", "doneWhen": "一頁包含標題、三個圖像重點與至少六個目標語詞彙。"},
+    {"primary": "code", "secondary": "music", "difficulty": 4, "minMinutes": 36, "directionIndex": 2, "title": "做一個節奏小工具", "brief": "用按鈕或鍵盤觸發三種節奏聲音。", "doneWhen": "至少三個可觸發聲音、清楚操作提示，以及一張畫面截圖。"},
+    {"primary": "language", "secondary": "network", "difficulty": 3, "minMinutes": 30, "directionIndex": 3, "title": "用外語介紹一件作品", "brief": "把最近作品整理成一則適合分享的外語短訊息。", "doneWhen": "完成 80–120 字介紹，包含作品目的、目前狀態與一個容易回答的問題。"}
+  ],
+  "networkActions": [
+    {"title": "分享一個真正有用的東西", "detail": "想起一個最近可能用得上的人，附上一句為什麼適合他。不必公開姓名。"},
+    {"title": "補上一則沒有壓力的跟進", "detail": "延續一段未完成對話，只提供新資訊或一個容易回答的小問題。"},
+    {"title": "給一個具體而真誠的感謝", "detail": "說明對方某個行動實際帶來的幫助，不附帶新的請求。"},
+    {"title": "主動回報一個小進展", "detail": "向曾給你建議的人回報結果與收穫，讓互動形成閉環。"}
+  ]
+}

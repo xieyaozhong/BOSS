@@ -1,0 +1,81 @@
+name: Daily BOSS plan and Pages deployment
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - ".github/workflows/daily-pages.yml"
+      - "scripts/**"
+      - "tests/**"
+      - "site/**"
+  pull_request:
+    paths:
+      - ".github/workflows/daily-pages.yml"
+      - "scripts/**"
+      - "tests/**"
+      - "site/**"
+  workflow_dispatch:
+  schedule:
+    - cron: "17 6 * * *"
+      timezone: "Asia/Taipei"
+    - cron: "47 6 * * *"
+      timezone: "Asia/Taipei"
+
+permissions: {}
+
+concurrency:
+  group: boss-pages-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    permissions:
+      contents: read
+      pages: read
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+
+      - name: Set up Python
+        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7
+        with:
+          python-version: "3.12"
+
+      - name: Generate today's plan
+        run: python scripts/generate_daily.py
+
+      - name: Validate generator and public site
+        run: |
+          python -m py_compile scripts/generate_daily.py scripts/validate_site.py
+          python -m unittest discover -s tests -v
+          python scripts/validate_site.py
+          node --check site/assets/app.js
+
+      - name: Configure GitHub Pages
+        if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
+        uses: actions/configure-pages@45bfe0192ca1faeb007ade9deae92b16b8254a0d # v6
+
+      - name: Upload Pages artifact
+        if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
+        uses: actions/upload-pages-artifact@fc324d3547104276b827a68afc52ff2a11cc49c9 # v5
+        with:
+          path: ./site
+          retention-days: 3
+
+  deploy:
+    if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    needs: build
+    permissions:
+      pages: write
+      id-token: write
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@cd2ce8fcbc39b97be8ca5fce6e763baed58fa128 # v5

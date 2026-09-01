@@ -1,0 +1,87 @@
+{
+  "schemaVersion": 1,
+  "date": "2026-09-02",
+  "effectiveAt": "2026-09-02T06:17:00+08:00",
+  "timezone": "Asia/Taipei",
+  "engine": "rules-v2",
+  "confidence": "calibration-needed",
+  "dailyBudgetMinutes": 45,
+  "focus": {
+    "skillId": "art",
+    "secondarySkillId": null,
+    "tags": [
+      "繪畫",
+      "精進｜光影分組與空間感"
+    ],
+    "direction": "光影分組與空間感",
+    "difficulty": 2,
+    "minMinutes": 18,
+    "title": "光影臨摹卡",
+    "why": "先用一個難度 2/5、可完成的繪畫產出建立基準；校準程度後再依紀錄調整。",
+    "totalMinutes": 32,
+    "steps": [
+      {
+        "minutes": 6,
+        "title": "界定範圍",
+        "detail": "把完成條件放在眼前，只準備這次會用到的素材與工具。"
+      },
+      {
+        "minutes": 18,
+        "title": "做出主體",
+        "detail": "選一張照片，先做黑白分組再補一層中間調。"
+      },
+      {
+        "minutes": 8,
+        "title": "收尾與保存",
+        "detail": "停止增加功能或細節；檢查完成條件，命名、匯出並留下一張證據。"
+      }
+    ],
+    "deliverable": {
+      "title": "光影臨摹卡",
+      "doneWhen": "保存參考圖與完成圖，並標記最亮與最暗區域。"
+    }
+  },
+  "maintain": {
+    "skillId": "code",
+    "skillName": "程式",
+    "minutes": 8,
+    "title": "十分鐘重構",
+    "detail": "找一段重複邏輯，抽成名稱清楚的小函式並重新執行。"
+  },
+  "network": {
+    "minutes": 5,
+    "title": "補上一則沒有壓力的跟進",
+    "detail": "延續一段未完成對話，只提供新資訊或一個容易回答的小問題。"
+  },
+  "selection": {
+    "ranking": [
+      {
+        "skillId": "art",
+        "score": 0.77
+      },
+      {
+        "skillId": "code",
+        "score": 0.42
+      },
+      {
+        "skillId": "language",
+        "score": 0.27
+      },
+      {
+        "skillId": "music",
+        "score": 0.27
+      },
+      {
+        "skillId": "network",
+        "score": 0.27
+      }
+    ],
+    "signals": [
+      "目標差距",
+      "優先權",
+      "五日輪替",
+      "時間與難度適配",
+      "明確完成條件"
+    ]
+  }
+}
