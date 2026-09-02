@@ -16,6 +16,9 @@ const state = {
   certificates: [],
   certificateMeta: null,
   certificatesLoading: true,
+  musicCatalog: null,
+  musicLoading: true,
+  selectedInstrumentId: "violin",
   plan: null,
   activity: [],
   timerStartedAt: null,
@@ -114,6 +117,45 @@ function writeImportedBundle(profile, activity, micro) {
 }
 
 const EXPECTED_SKILL_IDS = ["music", "art", "code", "language", "network"];
+const MUSIC_INSTRUMENTS = {
+  violin: { name: "小提琴", englishName: "VIOLIN", accent: "#ff9c74", symbol: "VN" },
+  guitar: { name: "吉他", englishName: "GUITAR", accent: "#7ccdb4", symbol: "GT" },
+  piano: { name: "鋼琴", englishName: "PIANO", accent: "#b9a4ff", symbol: "PN" }
+};
+const MUSIC_SECTIONS = {
+  scores: { label: "樂譜", englishName: "SCORES", linkLabel: "開啟樂譜來源" },
+  theory: { label: "樂理", englishName: "THEORY", linkLabel: "開啟參考資料" },
+  works: { label: "作品", englishName: "WORKS", linkLabel: "開啟作品" }
+};
+const MUSIC_EMPTY_COPY = {
+  violin: {
+    scores: "只會列出實際練習，且來源為自作、公版版本或合法授權的樂譜。",
+    theory: "完成一次音階、節奏、調性或樂句分析後，再把筆記加入這裡。",
+    works: "有實際錄音、演出或自作片段後再顯示，不以示範曲目補位。"
+  },
+  guitar: {
+    scores: "曲名與譜面只有在實際練習且來源合法時，才會加入這裡。",
+    theory: "整理一次指板、和弦、節奏或移調練習後，再把筆記加入這裡。",
+    works: "完成原創、演奏錄音、即興或合法改編後，再建立作品卡。"
+  },
+  piano: {
+    scores: "不會猜測你的鋼琴曲；實際開始練習後，再記錄合法樂譜來源。",
+    theory: "完成一次和聲、音階、終止式或曲式整理後，再把筆記加入這裡。",
+    works: "有真實錄音、演出、即興或原創內容後，再加入作品。"
+  }
+};
+const MUSIC_RIGHTS_LABELS = {
+  "creator-owned": "本人原創",
+  "explicit-license": "已獲授權",
+  "public-domain-edition": "公版版本",
+  "external-link-only": "僅外部連結"
+};
+const MUSIC_LICENSE_URLS = {
+  "CC-BY-4.0": "https://creativecommons.org/licenses/by/4.0/",
+  "CC-BY-SA-4.0": "https://creativecommons.org/licenses/by-sa/4.0/",
+  "CC0-1.0": "https://creativecommons.org/publicdomain/zero/1.0/",
+  "Public Domain": "https://creativecommons.org/publicdomain/mark/1.0/"
+};
 
 function isValidProfile(data) {
   if (!data || !data.profile || !data.recommendation) return false;
@@ -284,6 +326,63 @@ function isValidCertificates(data) {
   return true;
 }
 
+function isSafeMusicUrl(value) {
+  if (value === null) return true;
+  if (typeof value !== "string" || value.length > 2048) return false;
+  try {
+    const url = new URL(value);
+    if (url.protocol !== "https:" || !url.hostname || url.username || url.password || (url.port && url.port !== "443") || url.hash) return false;
+    return [...url.searchParams.keys()].every((key) => !/(?:token|key|signature|auth|email)/i.test(key));
+  } catch {
+    return false;
+  }
+}
+
+function isValidMusicCatalog(data) {
+  const topKeys = new Set(["schemaVersion", "updatedAt", "instrumentCount", "itemCount", "instruments"]);
+  if (!data || Object.keys(data).length !== topKeys.size || !Object.keys(data).every((key) => topKeys.has(key))) return false;
+  if (data.schemaVersion !== 1 || typeof data.updatedAt !== "string" || !/(?:Z|[+-]\d{2}:\d{2})$/.test(data.updatedAt) || Number.isNaN(Date.parse(data.updatedAt))) return false;
+  if (data.instrumentCount !== 3 || !Number.isInteger(data.itemCount) || data.itemCount < 0 || !Array.isArray(data.instruments) || data.instruments.length !== 3) return false;
+
+  const instrumentKeys = new Set(["id", "name", "englishName", "tagline", "source", "sections"]);
+  const sectionKeys = Object.keys(MUSIC_SECTIONS);
+  const itemKeys = new Set(["id", "title", "summary", "url", "source", "rights"]);
+  const rightsKeys = new Set(["basis", "license", "sourceUrl", "attribution"]);
+  const licenseAllowlist = new Set(["CC-BY-4.0", "CC-BY-SA-4.0", "CC0-1.0"]);
+  const seenIds = new Set();
+  let itemCount = 0;
+
+  for (const instrument of data.instruments) {
+    if (!instrument || Object.keys(instrument).length !== instrumentKeys.size || !Object.keys(instrument).every((key) => instrumentKeys.has(key))) return false;
+    const expected = MUSIC_INSTRUMENTS[instrument.id];
+    if (!expected || seenIds.has(instrument.id) || instrument.name !== expected.name || instrument.englishName !== expected.englishName) return false;
+    if (typeof instrument.tagline !== "string" || instrument.tagline.trim().length < 8 || instrument.tagline.length > 160 || instrument.source !== "user-confirmed") return false;
+    if (!instrument.sections || Object.keys(instrument.sections).length !== sectionKeys.length || !sectionKeys.every((key) => Array.isArray(instrument.sections[key]))) return false;
+    seenIds.add(instrument.id);
+
+    for (const sectionId of sectionKeys) {
+      for (const item of instrument.sections[sectionId]) {
+        itemCount += 1;
+        if (!item || Object.keys(item).length !== itemKeys.size || !Object.keys(item).every((key) => itemKeys.has(key))) return false;
+        if (typeof item.id !== "string" || !/^[a-z0-9][a-z0-9-]{1,63}$/.test(item.id) || seenIds.has(item.id)) return false;
+        if (typeof item.title !== "string" || item.title.trim().length < 2 || item.title.length > 120) return false;
+        if (typeof item.summary !== "string" || item.summary.trim().length < 8 || item.summary.length > 200 || item.source !== "user-confirmed") return false;
+        if (!isSafeMusicUrl(item.url) || !item.rights || Object.keys(item.rights).length !== rightsKeys.size || !Object.keys(item.rights).every((key) => rightsKeys.has(key))) return false;
+
+        const { basis, license, sourceUrl, attribution } = item.rights;
+        if (!Object.prototype.hasOwnProperty.call(MUSIC_RIGHTS_LABELS, basis) || !isSafeMusicUrl(sourceUrl)) return false;
+        if (basis === "creator-owned" && (license !== null || sourceUrl !== null || attribution !== null)) return false;
+        if (basis === "explicit-license" && (!licenseAllowlist.has(license) || sourceUrl === null || typeof attribution !== "string" || attribution.trim().length < 3)) return false;
+        if (basis === "public-domain-edition" && (license !== "Public Domain" || sourceUrl === null || typeof attribution !== "string" || attribution.trim().length < 3)) return false;
+        if (basis === "external-link-only" && (license !== null || sourceUrl === null || item.url !== sourceUrl || typeof attribution !== "string" || attribution.trim().length < 3)) return false;
+        if ([license, attribution].some((value) => value !== null && (typeof value !== "string" || value.length > 200))) return false;
+        seenIds.add(item.id);
+      }
+    }
+  }
+  return seenIds.size === data.itemCount + 3 && data.itemCount === itemCount && Object.keys(MUSIC_INSTRUMENTS).every((id) => data.instruments.some((instrument) => instrument.id === id));
+}
+
 async function loadProjectsData() {
   try {
     const response = await fetch("./data/github-projects.json", { cache: "no-store" });
@@ -313,6 +412,20 @@ async function loadCertificatesData() {
     state.certificateMeta = null;
   } finally {
     state.certificatesLoading = false;
+  }
+}
+
+async function loadMusicData() {
+  try {
+    const response = await fetch("./data/music-library.json", { cache: "no-store" });
+    if (!response.ok) return;
+    const musicCatalog = await response.json();
+    if (!isValidMusicCatalog(musicCatalog)) return;
+    state.musicCatalog = musicCatalog;
+  } catch {
+    state.musicCatalog = null;
+  } finally {
+    state.musicLoading = false;
   }
 }
 
@@ -476,6 +589,7 @@ function renderAll() {
   renderDateAndStats();
   renderPlan();
   renderSkills();
+  renderMusic();
   renderProjects();
   renderCertificates();
   renderProfileForm();
@@ -563,8 +677,13 @@ function renderSkills() {
     const footer = make("div", "skill-footer");
     footer.append(make("span", "", "NEXT MILESTONE"), make("strong", "", skill.nextMilestone));
     card.append(footer);
+    if (skill.id === "music") {
+      const musicLink = make("a", "skill-section-link", "3 種樂器・9 個分區 →");
+      musicLink.href = "#music";
+      card.append(musicLink);
+    }
     if (skill.id === "code") {
-      const projectLink = make("a", "skill-project-link", state.projectMeta ? `${state.projects.length} 個 GitHub 作品 →` : "查看 GitHub 作品 →");
+      const projectLink = make("a", "skill-section-link", state.projectMeta ? `${state.projects.length} 個 GitHub 作品 →` : "查看 GitHub 作品 →");
       projectLink.href = "#projects";
       card.append(projectLink);
     }
@@ -573,6 +692,148 @@ function renderSkills() {
   $("#skill-grid").replaceChildren(...cards);
   const calibrated = state.profile.skills.every((skill) => skill.calibrated);
   $("#calibration-note").classList.toggle("hidden", calibrated);
+}
+
+function musicItemTotal(instrument) {
+  return Object.values(instrument.sections).reduce((total, items) => total + items.length, 0);
+}
+
+function renderMusicItem(item, sectionId) {
+  const listItem = make("li", "music-item");
+  listItem.append(make("h5", "", item.title), make("p", "", item.summary));
+  const meta = make("div", "music-item-meta");
+  meta.append(make("span", "", "本人確認"), make("span", "", MUSIC_RIGHTS_LABELS[item.rights.basis]));
+  if (item.rights.license) {
+    const license = make("a", "", item.rights.license);
+    license.href = MUSIC_LICENSE_URLS[item.rights.license];
+    license.target = "_blank";
+    license.rel = "noopener noreferrer";
+    license.setAttribute("aria-label", `查看 ${item.rights.license} 授權條款，新分頁開啟`);
+    meta.append(license);
+  }
+  listItem.append(meta);
+  if (item.rights.attribution) listItem.append(make("p", "music-item-attribution", `來源署名｜${item.rights.attribution}`));
+  const actions = make("div", "music-item-actions");
+  if (item.url) {
+    const link = make("a", "music-item-link", `${MUSIC_SECTIONS[sectionId].linkLabel} ↗`);
+    link.href = item.url;
+    link.target = "_blank";
+    link.rel = "noopener noreferrer";
+    link.setAttribute("aria-label", `${MUSIC_SECTIONS[sectionId].linkLabel}：${item.title}，新分頁開啟`);
+    actions.append(link);
+  }
+  if (item.rights.sourceUrl && item.rights.sourceUrl !== item.url) {
+    const source = make("a", "music-item-link music-source-link", "查看來源與授權依據 ↗");
+    source.href = item.rights.sourceUrl;
+    source.target = "_blank";
+    source.rel = "noopener noreferrer";
+    source.setAttribute("aria-label", `查看 ${item.title} 的來源與授權依據，新分頁開啟`);
+    actions.append(source);
+  }
+  if (actions.childElementCount) listItem.append(actions);
+  return listItem;
+}
+
+function renderMusicCollection(instrument, sectionId) {
+  const section = MUSIC_SECTIONS[sectionId];
+  const items = instrument.sections[sectionId];
+  const collection = make("section", "music-collection");
+  const headingId = `music-${instrument.id}-${sectionId}-title`;
+  collection.setAttribute("aria-labelledby", headingId);
+  const head = make("div", "music-collection-head");
+  const titleWrap = make("div");
+  titleWrap.append(make("span", "", section.englishName), make("h4", "", section.label));
+  titleWrap.lastChild.id = headingId;
+  head.append(titleWrap, make("span", "music-collection-count", String(items.length).padStart(2, "0")));
+  collection.append(head);
+
+  if (items.length === 0) {
+    const empty = make("div", "music-empty-state");
+    empty.append(make("strong", "", `尚未加入${instrument.name}${section.label}`), make("p", "", MUSIC_EMPTY_COPY[instrument.id][sectionId]));
+    collection.append(empty);
+    return collection;
+  }
+
+  const list = make("ul", "music-item-list");
+  list.append(...items.map((item) => renderMusicItem(item, sectionId)));
+  collection.append(list);
+  return collection;
+}
+
+function renderMusicPanel() {
+  const stage = $("#music-stage");
+  const instrument = state.musicCatalog.instruments.find((item) => item.id === state.selectedInstrumentId) || state.musicCatalog.instruments[0];
+  state.selectedInstrumentId = instrument.id;
+  const presentation = MUSIC_INSTRUMENTS[instrument.id];
+  stage.setAttribute("aria-busy", "true");
+
+  const panel = make("section", "music-panel");
+  panel.style.setProperty("--instrument-accent", presentation.accent);
+  panel.setAttribute("aria-labelledby", "music-instrument-title");
+  const head = make("div", "music-panel-head");
+  const symbol = make("span", "music-instrument-symbol", presentation.symbol);
+  symbol.setAttribute("aria-hidden", "true");
+  const titleWrap = make("div");
+  const title = make("h3", "", instrument.name);
+  title.id = "music-instrument-title";
+  titleWrap.append(title, make("p", "", `${instrument.englishName} · ${instrument.tagline}`));
+  const itemTotal = musicItemTotal(instrument);
+  head.append(symbol, titleWrap, make("span", "music-panel-count", `${itemTotal} ITEMS · 3 SECTIONS`));
+  const content = make("div", "music-content-grid");
+  content.append(...Object.keys(MUSIC_SECTIONS).map((sectionId) => renderMusicCollection(instrument, sectionId)));
+  panel.append(head, content);
+  stage.replaceChildren(panel);
+  stage.setAttribute("aria-busy", "false");
+  $("#music-summary").textContent = `${instrument.name} · 樂譜 ${instrument.sections.scores.length} · 樂理 ${instrument.sections.theory.length} · 作品 ${instrument.sections.works.length}`;
+}
+
+function selectMusicInstrument(instrumentId) {
+  if (!state.musicCatalog?.instruments.some((instrument) => instrument.id === instrumentId)) return;
+  state.selectedInstrumentId = instrumentId;
+  $$("#music-controls [data-instrument]").forEach((button) => {
+    button.setAttribute("aria-pressed", String(button.dataset.instrument === instrumentId));
+  });
+  renderMusicPanel();
+}
+
+function renderMusic() {
+  const controls = $("#music-controls");
+  const stage = $("#music-stage");
+  stage.setAttribute("aria-busy", "true");
+
+  if (state.musicLoading) {
+    controls.replaceChildren();
+    stage.replaceChildren(make("p", "music-load-state", "正在讀取小提琴、吉他與鋼琴資料…"));
+    $("#music-summary").textContent = "正在整理音樂資料庫…";
+    return;
+  }
+
+  if (!state.musicCatalog) {
+    controls.replaceChildren();
+    stage.replaceChildren(make("p", "music-load-state", "音樂資料暫時無法載入；網站其他功能仍可使用。"));
+    stage.setAttribute("aria-busy", "false");
+    $("#music-summary").textContent = "音樂資料暫時無法載入";
+    return;
+  }
+
+  if (!state.musicCatalog.instruments.some((instrument) => instrument.id === state.selectedInstrumentId)) {
+    state.selectedInstrumentId = state.musicCatalog.instruments[0].id;
+  }
+  const buttons = state.musicCatalog.instruments.map((instrument) => {
+    const presentation = MUSIC_INSTRUMENTS[instrument.id];
+    const button = make("button", "music-instrument-button");
+    button.type = "button";
+    button.dataset.instrument = instrument.id;
+    button.style.setProperty("--instrument-accent", presentation.accent);
+    button.setAttribute("aria-pressed", String(instrument.id === state.selectedInstrumentId));
+    const label = make("span");
+    label.append(make("strong", "", instrument.name), make("span", "", `${instrument.englishName} · ${musicItemTotal(instrument)} ITEMS`));
+    button.append(label);
+    button.addEventListener("click", () => selectMusicInstrument(instrument.id));
+    return button;
+  });
+  controls.replaceChildren(...buttons);
+  renderMusicPanel();
 }
 
 function projectDateLabel(value) {
@@ -1241,6 +1502,10 @@ async function init() {
       renderProjects();
     });
     loadCertificatesData().then(renderCertificates);
+    loadMusicData().then(() => {
+      renderSkills();
+      renderMusic();
+    });
     setInterval(checkDateRollover, 60000);
     document.addEventListener("visibilitychange", () => {
       if (document.visibilityState === "visible") checkDateRollover();

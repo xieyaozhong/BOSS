@@ -6,11 +6,11 @@ from __future__ import annotations
 import argparse
 import json
 import re
-from datetime import date, datetime
+from datetime import date, datetime, timedelta
 from html.parser import HTMLParser
 from pathlib import Path
 from typing import Any
-from urllib.parse import urlparse
+from urllib.parse import parse_qsl, urlparse
 from zoneinfo import ZoneInfo
 
 try:
@@ -191,6 +191,108 @@ def validate_certificates(catalog: dict[str, Any]) -> None:
         signatures.add(signature)
 
 
+def validate_music_url(value: Any, label: str) -> str:
+    require(isinstance(value, str) and 1 <= len(value) <= 2048, f"{label} must be a URL")
+    parsed = urlparse(value)
+    try:
+        port = parsed.port
+    except ValueError as error:
+        raise ValueError(f"{label} contains an invalid port") from error
+    require(
+        parsed.scheme == "https" and bool(parsed.hostname) and not parsed.username and not parsed.password
+        and port in (None, 443) and not parsed.fragment,
+        f"{label} must be a safe HTTPS URL",
+    )
+    forbidden_query = re.compile(r"(?:token|key|signature|auth|email)", re.I)
+    require(not any(forbidden_query.search(key) for key, _ in parse_qsl(parsed.query, keep_blank_values=True)), f"{label} contains a sensitive query parameter")
+    return "external"
+
+
+def validate_music_library(catalog: dict[str, Any]) -> None:
+    expected_catalog_keys = {"schemaVersion", "updatedAt", "instrumentCount", "itemCount", "instruments"}
+    require(isinstance(catalog, dict), "music library must be an object")
+    require(set(catalog) == expected_catalog_keys, "music library contains missing or unknown fields")
+    require(type(catalog.get("schemaVersion")) is int and catalog["schemaVersion"] == 1, "music library schemaVersion must be integer 1")
+    parse_iso_datetime(catalog.get("updatedAt"), "music library updatedAt")
+    updated_at = datetime.fromisoformat(catalog["updatedAt"].replace("Z", "+00:00"))
+    require(updated_at.utcoffset() is not None, "music library updatedAt must include a timezone")
+    require(updated_at <= datetime.now(updated_at.tzinfo) + timedelta(minutes=5), "music library updatedAt cannot be in the future")
+
+    instruments = catalog.get("instruments")
+    require(type(catalog.get("instrumentCount")) is int and catalog["instrumentCount"] == 3, "music library must declare three instruments")
+    require(type(catalog.get("itemCount")) is int and catalog["itemCount"] >= 0, "music library itemCount must be non-negative")
+    require(isinstance(instruments, list) and len(instruments) == 3, "music library must contain exactly three instruments")
+
+    expected_instruments = {
+        "violin": ("小提琴", "VIOLIN"),
+        "guitar": ("吉他", "GUITAR"),
+        "piano": ("鋼琴", "PIANO"),
+    }
+    instrument_keys = {"id", "name", "englishName", "tagline", "source", "sections"}
+    section_ids = {"scores", "theory", "works"}
+    item_keys = {"id", "title", "summary", "url", "source", "rights"}
+    rights_keys = {"basis", "license", "sourceUrl", "attribution"}
+    rights_bases = {"creator-owned", "explicit-license", "public-domain-edition", "external-link-only"}
+    license_allowlist = {"CC-BY-4.0", "CC-BY-SA-4.0", "CC0-1.0"}
+    seen_ids: set[str] = set()
+    item_count = 0
+
+    for instrument in instruments:
+        require(isinstance(instrument, dict) and set(instrument) == instrument_keys, "music instrument contains missing or unknown fields")
+        instrument_id = instrument.get("id")
+        require(isinstance(instrument_id, str) and instrument_id in expected_instruments and instrument_id not in seen_ids, f"invalid or duplicate music instrument: {instrument_id}")
+        expected_name, expected_english = expected_instruments[instrument_id]
+        require(instrument.get("name") == expected_name and instrument.get("englishName") == expected_english, f"music instrument label mismatch for {instrument_id}")
+        tagline = instrument.get("tagline")
+        require(isinstance(tagline, str) and 8 <= len(tagline.strip()) <= 160, f"invalid tagline for {instrument_id}")
+        require(instrument.get("source") == "user-confirmed", f"music instrument {instrument_id} must be user-confirmed")
+        sections = instrument.get("sections")
+        require(isinstance(sections, dict) and set(sections) == section_ids, f"music instrument {instrument_id} must contain scores, theory, and works")
+        require(all(isinstance(sections[section_id], list) for section_id in section_ids), f"music instrument {instrument_id} sections must be arrays")
+        seen_ids.add(instrument_id)
+
+        for section_id in section_ids:
+            for item in sections[section_id]:
+                item_count += 1
+                require(isinstance(item, dict) and set(item) == item_keys, f"music item in {instrument_id}/{section_id} contains missing, private, or unknown fields")
+                item_id = item.get("id")
+                require(isinstance(item_id, str) and re.fullmatch(r"[a-z0-9][a-z0-9-]{1,63}", item_id), "invalid music item id")
+                require(item_id not in seen_ids, f"duplicate music id: {item_id}")
+                title = item.get("title")
+                summary = item.get("summary")
+                require(isinstance(title, str) and 2 <= len(title.strip()) <= 120, f"invalid music item title for {item_id}")
+                require(isinstance(summary, str) and 8 <= len(summary.strip()) <= 200, f"invalid music item summary for {item_id}")
+                require(item.get("source") == "user-confirmed", f"music item {item_id} must be user-confirmed")
+                item_url = item.get("url")
+                item_url_kind = validate_music_url(item_url, f"url for {item_id}") if item_url is not None else None
+
+                rights = item.get("rights")
+                require(isinstance(rights, dict) and set(rights) == rights_keys, f"invalid rights record for {item_id}")
+                basis = rights.get("basis")
+                license_name = rights.get("license")
+                source_url = rights.get("sourceUrl")
+                attribution = rights.get("attribution")
+                require(basis in rights_bases, f"unknown rights basis for {item_id}")
+                if source_url is not None:
+                    validate_music_url(source_url, f"rights sourceUrl for {item_id}")
+                require(license_name is None or (isinstance(license_name, str) and len(license_name) <= 80), f"invalid license for {item_id}")
+                require(attribution is None or (isinstance(attribution, str) and 3 <= len(attribution.strip()) <= 200), f"invalid attribution for {item_id}")
+
+                if basis == "creator-owned":
+                    require(license_name is None and source_url is None and attribution is None, f"creator-owned item {item_id} cannot claim third-party rights metadata")
+                elif basis == "explicit-license":
+                    require(license_name in license_allowlist and source_url is not None and attribution is not None, f"licensed item {item_id} needs an allowed license, source, and attribution")
+                elif basis == "public-domain-edition":
+                    require(license_name == "Public Domain" and source_url is not None and attribution is not None, f"public-domain item {item_id} needs edition evidence and attribution")
+                else:
+                    require(license_name is None and source_url is not None and attribution is not None, f"external-only item {item_id} needs a source and attribution")
+                    require(item_url_kind == "external" and item_url == source_url, f"external-only item {item_id} may only link to its source")
+                seen_ids.add(item_id)
+
+    require(set(expected_instruments) <= seen_ids, "music library is missing a required instrument")
+    require(item_count == catalog["itemCount"], "music library itemCount does not match its sections")
+
+
 def validate_projects(catalog: dict[str, Any]) -> None:
     require(catalog.get("schemaVersion") == 1, "project catalog schemaVersion must be 1")
     require(catalog.get("owner") == "xieyaozhong", "project catalog owner must be xieyaozhong")
@@ -297,9 +399,9 @@ def validate_assets() -> None:
             require(not path.name.startswith("."), f"unexpected hidden file in publication: {path.relative_to(SITE)}")
 
 
-def validate_public_content(profile: dict[str, Any], certificates: dict[str, Any]) -> None:
+def validate_public_content(profile: dict[str, Any], certificates: dict[str, Any], music_library: dict[str, Any]) -> None:
     forbidden_keys = re.compile(r"(^|\.)(email|phone|address|contactName|realName|token|secret|apiKey)$", re.I)
-    for label, dataset in (("profile", profile), ("certificate catalog", certificates)):
+    for label, dataset in (("profile", profile), ("certificate catalog", certificates), ("music library", music_library)):
         leaked = [key for key in walk_keys(dataset) if forbidden_keys.search(key)]
         require(not leaked, f"public {label} contains sensitive keys: {', '.join(leaked)}")
 
@@ -325,12 +427,14 @@ def main() -> None:
     profile = json.loads((SITE / "data" / "profile.json").read_text(encoding="utf-8"))
     projects = json.loads((SITE / "data" / "github-projects.json").read_text(encoding="utf-8"))
     certificates = json.loads((SITE / "data" / "certificates.json").read_text(encoding="utf-8"))
+    music_library = json.loads((SITE / "data" / "music-library.json").read_text(encoding="utf-8"))
     validate_profile(profile)
     validate_plan(plan, profile, expected_date)
     validate_projects(projects)
     validate_certificates(certificates)
+    validate_music_library(music_library)
     validate_assets()
-    validate_public_content(profile, certificates)
+    validate_public_content(profile, certificates, music_library)
     require((SITE / "assets" / "og.png").stat().st_size > 10_000, "social preview image is missing or too small")
     print("Site validation passed")
 

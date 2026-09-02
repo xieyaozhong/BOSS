@@ -1,0 +1,44 @@
+{
+  "schemaVersion": 1,
+  "updatedAt": "2026-09-02T17:14:10+08:00",
+  "instrumentCount": 3,
+  "itemCount": 0,
+  "instruments": [
+    {
+      "id": "violin",
+      "name": "小提琴",
+      "englishName": "VIOLIN",
+      "tagline": "把音準、運弓與樂句整理成能反覆追蹤的練習線索。",
+      "source": "user-confirmed",
+      "sections": {
+        "scores": [],
+        "theory": [],
+        "works": []
+      }
+    },
+    {
+      "id": "guitar",
+      "name": "吉他",
+      "englishName": "GUITAR",
+      "tagline": "把指板、和弦與節奏累積成可回看、可演奏的內容。",
+      "source": "user-confirmed",
+      "sections": {
+        "scores": [],
+        "theory": [],
+        "works": []
+      }
+    },
+    {
+      "id": "piano",
+      "name": "鋼琴",
+      "englishName": "PIANO",
+      "tagline": "把鋼琴曲、和聲與聲部練習連成可保存的學習紀錄。",
+      "source": "user-confirmed",
+      "sections": {
+        "scores": [],
+        "theory": [],
+        "works": []
+      }
+    }
+  ]
+}
