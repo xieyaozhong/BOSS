@@ -2,6 +2,8 @@
 
 一個部署在 GitHub Pages 的個人能力作業系統，把音樂、繪畫、程式、外語與人脈放進同一個每日入口。
 
+「程式」能力另有 GitHub 作品牆：每日同步帳號的公開、非 fork repository，並以人工校準的中文用途、分類與字章圖示整理展示。
+
 公開網站：<https://xieyaozhong.github.io/BOSS/>
 
 ## 它每天做什麼
@@ -14,6 +16,7 @@
 - 公開基準依能力差距、優先權與五日輪替生成；個人化層再加入練習空窗與近七日完成平衡
 - 主線、維持練習與人脈小步的合計時間不超過每日預算
 - 依目前／目標程度、實際難度與可用時間，選出能在今天完成的產出尺度
+- 同步 GitHub 公開作品的語言、更新時間與封存狀態；新 repository 會先進入待校準，避免誤把內部或未完成內容放大公開
 
 預設每天台北時間 **06:17** 由 GitHub Actions 重新產生並部署，**06:47** 再做一次等冪補跑，降低排程偶發延誤的影響。規則引擎不需要 API 金鑰，也不會產生費用。
 
@@ -26,10 +29,11 @@
 
 初始程度刻意標成「待校準」，不會假裝知道使用者的真實能力。
 
-## 兩層自動化
+## 三層自動化
 
 1. **公開基準層**：`scripts/generate_daily.py` 每天在 GitHub Actions 內產生 `today.json`，並直接部署 Pages artifact。
 2. **個人適應層**：瀏覽器會依校準資料與完成紀錄重新計算當天建議；資料保存在 `localStorage`，不會被發佈到公開 repo。
+3. **作品同步層**：`scripts/generate_projects.py` 在建置時讀取 GitHub 公開 repository，合併 `config/project-overrides.json` 的中文用途與圖示後產生靜態作品目錄；瀏覽器不會直接呼叫 GitHub API。
 
 因此，不同裝置會看到同一個公開基準，但只有已校準的瀏覽器會有個人化紀錄。可以透過匯出／匯入 JSON 在裝置間搬移能力、主線產出與維持／人脈勾選紀錄；單筆產出也能從頁面刪除。
 
@@ -56,6 +60,7 @@
 
 ```bash
 python scripts/generate_daily.py
+python scripts/generate_projects.py
 python -m unittest discover -s tests -v
 python scripts/validate_site.py
 python -m http.server 4173 --directory site
@@ -63,11 +68,13 @@ python -m http.server 4173 --directory site
 
 然後開啟 <http://localhost:4173/>。
 
+GitHub 作品用途、顯示名稱、分類、字章與限制說明集中在 [`config/project-overrides.json`](config/project-overrides.json)。新 repository 會被每日偵測，但預設要在這裡補上一句用途後才會公開，避免誤收錄測試或敏感專案；如果明確希望未校準作品直接顯示，可將 `publishUncurated` 改成 `true`，屆時會使用 GitHub description 或中性說明作為備援。
+
 ## 自動部署
 
 工作流程位於 [`.github/workflows/daily-pages.yml`](.github/workflows/daily-pages.yml)，支援：
 
-- 推送 `site/`、`scripts/` 或 workflow 變更時部署
+- 推送 `site/`、`config/`、`scripts/` 或 workflow 變更時部署
 - 每天主排程與補跑排程
 - pull request 只驗證、不部署；部署任務只允許 `main`
 - 從 Actions 頁面手動執行
@@ -78,6 +85,7 @@ python -m http.server 4173 --directory site
 
 - 純 HTML、CSS、JavaScript，沒有前端框架或執行階段依賴
 - Python 3 標準函式庫規則引擎
+- GitHub REST API 建置時同步；前端只讀取已驗證的本機 JSON
 - GitHub Actions + GitHub Pages artifact deployment
 - 相對資源路徑，支援 `/BOSS/` project site
 - 完成紀錄與個人設定使用瀏覽器 localStorage

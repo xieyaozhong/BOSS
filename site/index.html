@@ -30,6 +30,7 @@
       <nav class="nav" aria-label="主要導覽">
         <a href="#today">今日</a>
         <a href="#skills">能力</a>
+        <a href="#projects">作品</a>
         <a href="#outputs">產出</a>
         <a href="#system">系統</a>
       </nav>
@@ -143,6 +144,27 @@
           <button class="text-button" type="button" data-open-profile>現在校準 →</button>
         </div>
         <div class="skill-grid" id="skill-grid" aria-live="polite"></div>
+      </section>
+
+      <section id="projects" class="projects-section section-block" aria-labelledby="projects-title">
+        <div class="section-heading project-heading">
+          <div>
+            <p class="section-label dark-label">PROGRAMMING · GITHUB WORKS</p>
+            <h2 id="projects-title">寫過的程式，<br />各自解決一件事。</h2>
+          </div>
+          <div class="project-summary" id="project-summary" role="status">正在整理公開作品…</div>
+        </div>
+
+        <div class="project-toolbar">
+          <div class="project-filters" id="project-filters" role="group" aria-label="依作品類型篩選"></div>
+          <a class="project-profile-link" href="https://github.com/xieyaozhong" target="_blank" rel="noreferrer" aria-label="前往 xieyaozhong 的 GitHub 個人頁，新分頁開啟">完整 GitHub →</a>
+        </div>
+        <p class="project-origin-note"><strong>瀏覽器資料提醒</strong>：這些 GitHub Pages 作品與 BOSS 共用 <code>xieyaozhong.github.io</code> 儲存範圍；請勿在本機紀錄填入敏感資料，並定期匯出備份。</p>
+        <ul class="project-grid" id="project-grid" aria-busy="true"></ul>
+        <div class="project-empty hidden" id="project-empty">
+          <p>作品資料暫時無法載入。</p>
+          <a href="https://github.com/xieyaozhong?tab=repositories" target="_blank" rel="noreferrer">直接查看 GitHub repositories →</a>
+        </div>
       </section>
 
       <section id="outputs" class="outputs-section section-block" aria-labelledby="outputs-title">

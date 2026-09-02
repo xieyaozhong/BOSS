@@ -5,12 +5,14 @@ on:
     branches: [main]
     paths:
       - ".github/workflows/daily-pages.yml"
+      - "config/**"
       - "scripts/**"
       - "tests/**"
       - "site/**"
   pull_request:
     paths:
       - ".github/workflows/daily-pages.yml"
+      - "config/**"
       - "scripts/**"
       - "tests/**"
       - "site/**"
@@ -43,12 +45,18 @@ jobs:
         with:
           python-version: "3.12"
 
+      - name: Sync public GitHub works
+        if: github.event_name != 'pull_request'
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: python scripts/generate_projects.py --max-stale-hours 36
+
       - name: Generate today's plan
         run: python scripts/generate_daily.py
 
       - name: Validate generator and public site
         run: |
-          python -m py_compile scripts/generate_daily.py scripts/validate_site.py
+          python -m py_compile scripts/generate_daily.py scripts/generate_projects.py scripts/validate_site.py
           python -m unittest discover -s tests -v
           python scripts/validate_site.py
           node --check site/assets/app.js

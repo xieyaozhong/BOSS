@@ -9,6 +9,10 @@ const state = {
   base: null,
   profile: null,
   publishedPlan: null,
+  projects: [],
+  projectMeta: null,
+  projectFilter: "all",
+  projectsLoading: true,
   plan: null,
   activity: [],
   timerStartedAt: null,
@@ -190,6 +194,58 @@ function sanitizeMicro(value) {
     .map(([key, item]) => [key, { maintain: Boolean(item.maintain), network: Boolean(item.network) }]));
 }
 
+function isSafeProjectUrl(value, repository = false) {
+  if (typeof value !== "string") return false;
+  try {
+    const url = new URL(value);
+    if (url.protocol !== "https:") return false;
+    if (!repository) return true;
+    return url.hostname === "github.com" && url.pathname.startsWith("/xieyaozhong/");
+  } catch {
+    return false;
+  }
+}
+
+function isValidProjects(data) {
+  if (!data || data.schemaVersion !== 1 || data.owner !== "xieyaozhong") return false;
+  if (!Array.isArray(data.projects) || !Array.isArray(data.categories)) return false;
+  if (!Number.isInteger(data.total) || data.total !== data.projects.length) return false;
+  if (!Number.isInteger(data.featuredCount) || data.featuredCount < 0 || !Number.isInteger(data.pendingCount) || data.pendingCount < 0) return false;
+  if (!data.categories.every((category) => category && typeof category.id === "string" && typeof category.label === "string" && Number.isInteger(category.count) && category.count > 0)) return false;
+  const categoryIds = new Set(data.categories.map((category) => category.id));
+  if (categoryIds.size !== data.categories.length) return false;
+  return data.projects.every((project) => project &&
+    typeof project.slug === "string" && project.slug.length > 0 && project.slug.length <= 100 &&
+    typeof project.title === "string" && project.title.trim() && project.title.length <= 120 &&
+    typeof project.purpose === "string" && project.purpose.trim() && project.purpose.length <= 180 &&
+    typeof project.icon === "string" && project.icon.trim() && project.icon.length <= 3 &&
+    /^#[0-9a-f]{6}$/i.test(project.accent) &&
+    categoryIds.has(project.category) &&
+    typeof project.categoryLabel === "string" && project.categoryLabel.trim() &&
+    isSafeProjectUrl(project.repoUrl, true) &&
+    (!project.liveUrl || isSafeProjectUrl(project.liveUrl)) &&
+    typeof project.archived === "boolean" &&
+    typeof project.template === "boolean" &&
+    typeof project.featured === "boolean"
+  );
+}
+
+async function loadProjectsData() {
+  try {
+    const response = await fetch("./data/github-projects.json", { cache: "no-store" });
+    if (!response.ok) return;
+    const projects = await response.json();
+    if (!isValidProjects(projects)) return;
+    state.projects = projects.projects;
+    state.projectMeta = projects;
+  } catch {
+    state.projects = [];
+    state.projectMeta = null;
+  } finally {
+    state.projectsLoading = false;
+  }
+}
+
 async function loadData() {
   const [profileResponse, planResponse] = await Promise.all([
     fetch("./data/profile.json", { cache: "no-store" }),
@@ -350,6 +406,7 @@ function renderAll() {
   renderDateAndStats();
   renderPlan();
   renderSkills();
+  renderProjects();
   renderProfileForm();
   renderWeek();
   renderOutputs();
@@ -435,11 +492,136 @@ function renderSkills() {
     const footer = make("div", "skill-footer");
     footer.append(make("span", "", "NEXT MILESTONE"), make("strong", "", skill.nextMilestone));
     card.append(footer);
+    if (skill.id === "code") {
+      const projectLink = make("a", "skill-project-link", state.projectMeta ? `${state.projects.length} 個 GitHub 作品 →` : "查看 GitHub 作品 →");
+      projectLink.href = "#projects";
+      card.append(projectLink);
+    }
     return card;
   });
   $("#skill-grid").replaceChildren(...cards);
   const calibrated = state.profile.skills.every((skill) => skill.calibrated);
   $("#calibration-note").classList.toggle("hidden", calibrated);
+}
+
+function projectDateLabel(value) {
+  const date = new Date(value);
+  if (Number.isNaN(date.valueOf())) return "日期未標示";
+  return new Intl.DateTimeFormat("zh-TW", {
+    timeZone: "Asia/Taipei",
+    year: "numeric",
+    month: "short",
+    day: "numeric"
+  }).format(date);
+}
+
+function applyProjectFilter(filter) {
+  state.projectFilter = filter;
+  let visible = 0;
+  $$('[data-project-filter]').forEach((button) => {
+    button.setAttribute("aria-pressed", String(button.dataset.projectFilter === filter));
+  });
+  $$("#project-grid [data-project-category]").forEach((item) => {
+    const show = filter === "all" || (filter === "featured" ? item.dataset.projectFeatured === "true" : item.dataset.projectCategory === filter);
+    item.hidden = !show;
+    if (show) visible += 1;
+  });
+  const selected = state.projectMeta?.categories.find((category) => category.id === filter);
+  const label = filter === "featured" ? "精選作品" : selected?.label || "全部作品";
+  const synced = state.projectMeta?.generatedAt ? projectDateLabel(state.projectMeta.generatedAt) : "尚未同步";
+  const pending = Number(state.projectMeta?.pendingCount || 0);
+  $("#project-summary").textContent = `${label} ${visible} 件 · 共 ${state.projects.length} 件公開作品${pending ? ` · ${pending} 件待校準` : ""} · ${synced} 同步`;
+}
+
+function renderProjects() {
+  const grid = $("#project-grid");
+  const empty = $("#project-empty");
+  grid.setAttribute("aria-busy", "true");
+  if (state.projectsLoading) {
+    grid.replaceChildren();
+    empty.classList.add("hidden");
+    $("#project-summary").textContent = "正在整理公開作品…";
+    return;
+  }
+  if (!state.projectMeta || state.projects.length === 0) {
+    grid.replaceChildren();
+    grid.setAttribute("aria-busy", "false");
+    empty.classList.remove("hidden");
+    $("#project-summary").textContent = "作品資料暫時無法載入";
+    return;
+  }
+  empty.classList.add("hidden");
+
+  const filterData = [
+    { id: "all", label: "全部", count: state.projects.length },
+    { id: "featured", label: "精選", count: state.projectMeta.featuredCount },
+    ...state.projectMeta.categories
+  ];
+  const filters = filterData.map((category) => {
+    const button = make("button", "project-filter", `${category.label} ${category.count}`);
+    button.type = "button";
+    button.dataset.projectFilter = category.id;
+    button.setAttribute("aria-pressed", "false");
+    button.addEventListener("click", () => applyProjectFilter(category.id));
+    return button;
+  });
+  $("#project-filters").replaceChildren(...filters);
+
+  const cards = state.projects.map((project, index) => {
+    const item = make("li", "project-list-item");
+    item.dataset.projectCategory = project.category;
+    item.dataset.projectFeatured = String(project.featured);
+    const card = make("article", "project-card");
+    card.style.setProperty("--project-accent", project.accent);
+
+    const top = make("div", "project-card-top");
+    const icon = make("span", "project-icon", project.icon);
+    icon.setAttribute("aria-hidden", "true");
+    const badges = make("div", "project-badges");
+    badges.append(make("span", "project-category", project.categoryLabel));
+    if (project.featured) badges.append(make("span", "project-featured", "精選"));
+    if (project.template) badges.append(make("span", "project-template", "範本"));
+    if (project.archived) badges.append(make("span", "project-archived", "已封存"));
+    top.append(icon, badges);
+
+    const number = make("span", "project-number", String(index + 1).padStart(2, "0"));
+    number.setAttribute("aria-hidden", "true");
+    const title = make("h3", "", project.title);
+    const slug = make("p", "project-slug", `github / ${project.slug}`);
+    const purpose = make("p", "project-purpose", project.purpose);
+    card.append(top, number, title, slug, purpose);
+    if (project.caution) card.append(make("p", "project-caution", `使用限制｜${project.caution}`));
+
+    const meta = make("div", "project-meta");
+    meta.append(make("span", "", project.language));
+    if (project.stars > 0) meta.append(make("span", "", `★ ${project.stars}`));
+    const updated = make("time", "", `更新 ${projectDateLabel(project.updatedAt)}`);
+    updated.dateTime = project.updatedAt;
+    meta.append(updated);
+
+    const actions = make("div", "project-actions");
+    const repository = make("a", "project-link", "查看程式碼 ↗");
+    repository.href = project.repoUrl;
+    repository.target = "_blank";
+    repository.rel = "noreferrer";
+    repository.setAttribute("aria-label", `查看 ${project.title} 的程式碼，新分頁開啟`);
+    if (project.liveUrl) {
+      const live = make("a", "project-link project-live-link", "開啟作品 ↗");
+      live.href = project.liveUrl;
+      live.target = "_blank";
+      live.rel = "noreferrer";
+      live.setAttribute("aria-label", `開啟 ${project.title}，新分頁開啟`);
+      actions.append(live);
+    }
+    actions.append(repository);
+    card.append(meta, actions);
+    item.append(card);
+    return item;
+  });
+  grid.replaceChildren(...cards);
+  if (!filterData.some((category) => category.id === state.projectFilter)) state.projectFilter = "all";
+  applyProjectFilter(state.projectFilter);
+  grid.setAttribute("aria-busy", "false");
 }
 
 function renderProfileForm() {
@@ -876,6 +1058,10 @@ async function init() {
     await loadData();
     bindEvents();
     renderAll();
+    loadProjectsData().then(() => {
+      renderSkills();
+      renderProjects();
+    });
     setInterval(checkDateRollover, 60000);
     document.addEventListener("visibilitychange", () => {
       if (document.visibilityState === "visible") checkDateRollover();

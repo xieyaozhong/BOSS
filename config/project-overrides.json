@@ -1,0 +1,277 @@
+{
+  "schemaVersion": 1,
+  "owner": "xieyaozhong",
+  "publishUncurated": false,
+  "categories": [
+    {"id": "system", "label": "系統・自動化"},
+    {"id": "education", "label": "教育・成長"},
+    {"id": "tools", "label": "生活・工具"},
+    {"id": "games", "label": "遊戲・互動"},
+    {"id": "creative", "label": "科學・創意"},
+    {"id": "business", "label": "品牌・商業"},
+    {"id": "other", "label": "其他作品"}
+  ],
+  "projects": {
+    "BOSS": {
+      "title": "BOSS 能力作業系統",
+      "icon": "BO",
+      "accent": "#8fb6ff",
+      "category": "system",
+      "purpose": "把五項能力轉成每日任務、時間預算與可保存的產出。",
+      "featuredRank": 1,
+      "liveUrl": "https://xieyaozhong.github.io/BOSS/"
+    },
+    "theard": {
+      "title": "THEARD",
+      "icon": "TH",
+      "accent": "#7ccdb4",
+      "category": "system",
+      "purpose": "整合聯盟內容排序、安全發布、活動票務與 Prompt 教學工作台。",
+      "featuredRank": 2
+    },
+    "Comic": {
+      "title": "零額度自動漫畫",
+      "icon": "4格",
+      "accent": "#f0c85a",
+      "category": "system",
+      "purpose": "每天用 Python 與 Pillow 零 API 成本產生原創繁中四格漫畫。",
+      "featuredRank": 3,
+      "liveUrl": "https://xieyaozhong.github.io/Comic/"
+    },
+    "Lo-ton-g": {
+      "title": "雨境",
+      "icon": "雨",
+      "accent": "#8fb6ff",
+      "category": "tools",
+      "purpose": "依定位與九點取樣，預估未來三小時的降雨方向與時間。",
+      "caution": "開啟後會要求定位；生活提醒不取代官方警特報或防災決策。",
+      "featuredRank": 4,
+      "liveUrl": "https://xieyaozhong.github.io/Lo-ton-g/"
+    },
+    "mathgradepoint": {
+      "title": "MATH//SCAN",
+      "icon": "∑",
+      "accent": "#b9a4ff",
+      "category": "education",
+      "purpose": "以自適應題目評估數學程度，產生能力圖與個人學習路徑。",
+      "caution": "結果供自我了解與學習規劃，不是正式學力鑑定。",
+      "featuredRank": 5
+    },
+    "DESI": {
+      "title": "DESI 生成式數學探索",
+      "icon": "Δ",
+      "accent": "#ff9c74",
+      "category": "creative",
+      "purpose": "用 Canvas 與 WebGL 把波動、碎形和數論變成十個生成視覺世界。",
+      "featuredRank": 6,
+      "liveUrl": "https://xieyaozhong.github.io/DESI/"
+    },
+    "ODISIS": {
+      "title": "Odysseus",
+      "icon": "OD",
+      "accent": "#f0c85a",
+      "category": "games",
+      "purpose": "以船員、貨艙與多項狀態推進《奧德賽》繁中選擇冒險。",
+      "featuredRank": 7
+    },
+    "Lifeline": {
+      "title": "生命線 Lifeline Suite",
+      "icon": "LF",
+      "accent": "#7ccdb4",
+      "category": "education",
+      "purpose": "整合個人任務、價值、課表、會考衝刺與自主訓練工具。",
+      "featuredRank": 8,
+      "liveUrl": "https://xieyaozhong.github.io/Lifeline/"
+    },
+    "CASE1-15000": {
+      "title": "投資結算管理中心",
+      "icon": "結",
+      "accent": "#7ccdb4",
+      "category": "tools",
+      "purpose": "匯入投資資料、計算到期日，並建立鎖定的批次結算報表。",
+      "caution": "資料可能包含個資；共用裝置請勿使用真實資料。"
+    },
+    "Kid-and-point": {
+      "title": "Kid & Point",
+      "icon": "KP",
+      "accent": "#f0c85a",
+      "category": "education",
+      "purpose": "讓老師、家長與孩子共用任務、核實點數、獎勵與成長報告。",
+      "caution": "正式使用前需確認 Firestore 安全規則。",
+      "liveUrl": "https://xieyaozhong.github.io/Kid-and-point/"
+    },
+    "start-heart-porject": {
+      "title": "NOCTUA 暗夜天體觀測台",
+      "icon": "星",
+      "accent": "#b9a4ff",
+      "category": "creative",
+      "purpose": "推演候選星系、呈現行星狀態，並管理發布與紀念登錄。",
+      "caution": "模型候選體不是正式天文發現。"
+    },
+    "Little-alchemist": {
+      "title": "小小煉金術士",
+      "icon": "煉",
+      "accent": "#ff9c74",
+      "category": "creative",
+      "purpose": "結合生活配方、元素週期表、化學反應與藥學知識地圖。",
+      "caution": "教育內容，不提供醫療或危險合成指示。",
+      "liveUrl": "https://little-alchemist.vercel.app"
+    },
+    "Resume-project": {
+      "title": "萬用履歷產生器",
+      "icon": "CV",
+      "accent": "#8fb6ff",
+      "category": "tools",
+      "purpose": "在瀏覽器製作 ATS 履歷，並匯出 PDF、純文字與 JSON 備份。"
+    },
+    "ningshin-line-bot": {
+      "title": "寧心雪 LINE Bot",
+      "icon": "寧",
+      "accent": "#7ccdb4",
+      "category": "system",
+      "purpose": "透過 LINE 接收文字，提供多模式 AI 對話與繁中語音回覆。",
+      "caution": "不是心理諮商或緊急支援；正式部署前也須確認舊憑證已輪替。"
+    },
+    "Doctor": {
+      "title": "乳房外科臨床助手",
+      "icon": "醫",
+      "accent": "#ff9c74",
+      "category": "tools",
+      "purpose": "供新人快速查閱臨床 SOP、每日核對、療程索引與手術流程。",
+      "caution": "內容標示源自院內 Knowledge；公開前須確認授權，且不能取代醫療判斷。"
+    },
+    "Money-money-money": {
+      "title": "股票智慧分析儀",
+      "icon": "股",
+      "accent": "#7ccdb4",
+      "category": "tools",
+      "purpose": "整合價格、技術指標、新聞情緒、估值與風險情境分析。",
+      "caution": "機率情境與技術分析不是投資建議。"
+    },
+    "Cat-cat-talk-": {
+      "title": "Cat Cat Talk",
+      "icon": "貓",
+      "accent": "#f0c85a",
+      "category": "tools",
+      "purpose": "提供人貓互動提示，並依聲音與肢體線索推測可能狀態。",
+      "caution": "趣味觀察不能取代獸醫或動物行為評估。",
+      "liveUrl": "https://xieyaozhong.github.io/Cat-cat-talk-/"
+    },
+    "Housework": {
+      "title": "家事模擬器",
+      "icon": "家",
+      "accent": "#7ccdb4",
+      "category": "tools",
+      "purpose": "把家事拆成計時回合、成果檢核與保存在裝置上的完成紀錄。"
+    },
+    "PAPER-STALY": {
+      "title": "PAPER-STALY 教材素材庫",
+      "icon": "紙",
+      "accent": "#b9a4ff",
+      "category": "education",
+      "purpose": "整理地球科學與物理教材的開放素材、授權與原創圖像。"
+    },
+    "FIRESTARE-PORJECT": {
+      "title": "星火計畫・排課中心",
+      "icon": "火",
+      "accent": "#ff9c74",
+      "category": "education",
+      "purpose": "建立課程、拖曳選課、套用點數與優惠券，並產生排課單。",
+      "caution": "單機展示版；資料只存在目前瀏覽器。",
+      "liveUrl": "https://xieyaozhong.github.io/FIRESTARE-PORJECT/"
+    },
+    "Little-helper": {
+      "title": "Little Helper 工具組",
+      "icon": "LH",
+      "accent": "#8fb6ff",
+      "category": "education",
+      "purpose": "提供傳說對決上分訓練，以及聊天題目與專注節奏輔助工具。"
+    },
+    "math-tutor-website": {
+      "title": "數學教學網站",
+      "icon": "π",
+      "accent": "#b9a4ff",
+      "category": "education",
+      "purpose": "提供數學教學、研究、教材與履歷區塊的學術型網站版型。",
+      "caution": "部分論文與教材連結仍是待替換的示意內容。"
+    },
+    "Coffee-ship": {
+      "title": "Coffee Ship",
+      "icon": "CS",
+      "accent": "#f0c85a",
+      "category": "games",
+      "purpose": "在像素咖啡船完成任務、航海探索、釣魚與多人互動。",
+      "caution": "正式使用前需確認 Firebase 安全規則。"
+    },
+    "Lit-fire": {
+      "title": "傳火計畫",
+      "icon": "焰",
+      "accent": "#ff9c74",
+      "category": "games",
+      "purpose": "讓兩支手機用點擊節奏、動作感測與房間配對傳遞生成火焰。",
+      "caution": "只需輕碰手機邊緣，勿撞擊螢幕；完整互傳需要後端。"
+    },
+    "LITTLE-GAME_spinwheel": {
+      "title": "LITTLE GAME 小遊戲合集",
+      "icon": "遊",
+      "accent": "#f0c85a",
+      "category": "games",
+      "purpose": "收納轉盤、彈珠、拉霸、射擊與咖啡主題等瀏覽器小遊戲。",
+      "liveUrl": "https://xieyaozhong.github.io/LITTLE-GAME_spinwheel/"
+    },
+    "Slap": {
+      "title": "SLAP!",
+      "icon": "啪",
+      "accent": "#ff9c74",
+      "category": "games",
+      "purpose": "把手機動作感測轉成拍擊音效、反應挑戰與移動警戒。",
+      "caution": "請勿敲打螢幕或硬物；網頁警戒不能取代實體防盜。"
+    },
+    "MBTI": {
+      "title": "MBTI 像素人格檢測所",
+      "icon": "16",
+      "accent": "#b9a4ff",
+      "category": "games",
+      "purpose": "用 24 道題產生四向度結果、原創像素人物與分享卡。",
+      "caution": "僅供娛樂與自我探索，不是心理診斷。",
+      "liveUrl": "https://xieyaozhong.github.io/MBTI/"
+    },
+    "life-simulation-": {
+      "title": "人生模擬器",
+      "icon": "生",
+      "accent": "#7ccdb4",
+      "category": "games",
+      "purpose": "透過七階段選擇生成能力、履歷、人生經歷與作品 Demo。"
+    },
+    "God-way": {
+      "title": "神途 GOD WAY",
+      "icon": "神",
+      "accent": "#b9a4ff",
+      "category": "creative",
+      "purpose": "用手機感測、聲音分析與民俗模組打造互動調查實驗。",
+      "caution": "民俗與感測互動僅供娛樂。"
+    },
+    "Thank-you-cai": {
+      "title": "謝謝你，菜！",
+      "icon": "菜",
+      "accent": "#7ccdb4",
+      "category": "business",
+      "purpose": "用像素蔬果、菜籃、點數與抽卡模擬菜攤購物體驗。"
+    },
+    "mobius-coffee": {
+      "title": "Mobius Coffee",
+      "icon": "∞",
+      "accent": "#f0c85a",
+      "category": "business",
+      "purpose": "咖啡店品牌網站原型，包含菜單、訂位、活動、地圖與後台 Demo。",
+      "caution": "目前表單與聯絡資料為示意，尚未接正式後端。"
+    },
+    "-": {
+      "title": "衣著選品店",
+      "icon": "衣",
+      "accent": "#ff9c74",
+      "category": "business",
+      "purpose": "展示服飾商品、分類、購物車與新品訂閱的靜態店面範本。"
+    }
+  }
+}
