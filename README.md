@@ -4,6 +4,8 @@
 
 「程式」能力另有 GitHub 作品牆：每日同步帳號的公開、非 fork repository，並以人工校準的中文用途、分類與字章圖示整理展示。
 
+網站也提供獨立的證照區，只呈現本人確認、適合公開的資格資料；在真實清單加入前會顯示明確空狀態，不以示範或推測內容補位。
+
 公開網站：<https://xieyaozhong.github.io/BOSS/>
 
 ## 它每天做什麼
@@ -17,6 +19,7 @@
 - 主線、維持練習與人脈小步的合計時間不超過每日預算
 - 依目前／目標程度、實際難度與可用時間，選出能在今天完成的產出尺度
 - 同步 GitHub 公開作品的語言、更新時間與封存狀態；新 repository 會先進入待校準，避免誤把內部或未完成內容放大公開
+- 展示本人確認的公開證照、發證單位、取得月份、有效狀態與關聯能力
 
 預設每天台北時間 **06:17** 由 GitHub Actions 重新產生並部署，**06:47** 再做一次等冪補跑，降低排程偶發延誤的影響。規則引擎不需要 API 金鑰，也不會產生費用。
 
@@ -69,6 +72,8 @@ python -m http.server 4173 --directory site
 然後開啟 <http://localhost:4173/>。
 
 GitHub 作品用途、顯示名稱、分類、字章與限制說明集中在 [`config/project-overrides.json`](config/project-overrides.json)。新 repository 會被每日偵測，但預設要在這裡補上一句用途後才會公開，避免誤收錄測試或敏感專案；如果明確希望未校準作品直接顯示，可將 `publishUncurated` 改成 `true`，屆時會使用 GitHub description 或中性說明作為備援。
+
+證照資料集中在 [`site/data/certificates.json`](site/data/certificates.json)。每筆資料必須標記為 `user-confirmed`，包含正式名稱、發證單位、取得月份、能力摘要與關聯能力；到期日及公開查驗連結可留空。網站不接受證號、QR Code、分數、個人姓名、證書掃描或 AI 推測資格，查驗連結也只能使用不含帳密、查詢參數與片段的 HTTPS 網址。
 
 ## 自動部署
 

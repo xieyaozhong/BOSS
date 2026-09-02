@@ -103,6 +103,94 @@ def parse_iso_datetime(value: Any, label: str) -> None:
         raise ValueError(f"{label} must be an ISO datetime") from error
 
 
+def parse_month(value: Any, label: str) -> date:
+    require(isinstance(value, str) and re.fullmatch(r"\d{4}-(?:0[1-9]|1[0-2])", value), f"{label} must use YYYY-MM")
+    try:
+        return date.fromisoformat(f"{value}-01")
+    except ValueError as error:
+        raise ValueError(f"{label} must be a valid month") from error
+
+
+def validate_certificates(catalog: dict[str, Any]) -> None:
+    expected_catalog_keys = {"schemaVersion", "updatedAt", "total", "certifications"}
+    require(isinstance(catalog, dict), "certificate catalog must be an object")
+    require(set(catalog) == expected_catalog_keys, "certificate catalog contains missing or unknown fields")
+    require(catalog.get("schemaVersion") == 1, "certificate catalog schemaVersion must be 1")
+    parse_iso_datetime(catalog.get("updatedAt"), "certificate updatedAt")
+    updated_at = datetime.fromisoformat(catalog["updatedAt"].replace("Z", "+00:00")).date()
+    certificates = catalog.get("certifications")
+    require(isinstance(certificates, list), "certifications must be an array")
+    require(type(catalog.get("total")) is int and catalog["total"] >= 0, "certificate total must be non-negative")
+    require(catalog["total"] == len(certificates), "certificate total does not match certifications")
+
+    expected_entry_keys = {
+        "id", "name", "issuer", "issuedOn", "expiresOn", "doesNotExpire",
+        "summary", "skillIds", "verificationUrl", "source", "confirmedOn"
+    }
+    valid_skill_ids = {"music", "art", "code", "language", "network"}
+    sensitive_label = re.compile(
+        r"(?:證號|證書編號|credential\s*(?:id|number)|license\s*(?:id|number)|serial\s*number|verification\s*code)",
+        re.I,
+    )
+    ids: set[str] = set()
+    signatures: set[tuple[str, str, str]] = set()
+
+    for certificate in certificates:
+        require(isinstance(certificate, dict), "certificate entry must be an object")
+        require(set(certificate) == expected_entry_keys, "certificate entry contains missing, private, or unknown fields")
+        certificate_id = certificate.get("id")
+        require(isinstance(certificate_id, str) and re.fullmatch(r"[a-z0-9][a-z0-9-]{1,63}", certificate_id), "invalid certificate id")
+        require(certificate_id not in ids, f"duplicate certificate id: {certificate_id}")
+
+        name = certificate.get("name")
+        issuer = certificate.get("issuer")
+        summary = certificate.get("summary")
+        require(isinstance(name, str) and 2 <= len(name.strip()) <= 120, f"invalid name for certificate {certificate_id}")
+        require(isinstance(issuer, str) and 2 <= len(issuer.strip()) <= 120, f"invalid issuer for certificate {certificate_id}")
+        require(isinstance(summary, str) and 8 <= len(summary.strip()) <= 200, f"invalid summary for certificate {certificate_id}")
+
+        issued_on = parse_month(certificate.get("issuedOn"), f"issuedOn for {certificate_id}")
+        expires_value = certificate.get("expiresOn")
+        expires_on = parse_month(expires_value, f"expiresOn for {certificate_id}") if expires_value is not None else None
+        does_not_expire = certificate.get("doesNotExpire")
+        require(type(does_not_expire) is bool, f"doesNotExpire must be boolean for {certificate_id}")
+        require(not does_not_expire or expires_on is None, f"permanent certificate {certificate_id} cannot also expire")
+        require(expires_on is None or expires_on >= issued_on, f"certificate {certificate_id} expires before it was issued")
+
+        skill_ids = certificate.get("skillIds")
+        require(isinstance(skill_ids, list) and 1 <= len(skill_ids) <= len(valid_skill_ids), f"skillIds are required for {certificate_id}")
+        require(all(isinstance(skill_id, str) for skill_id in skill_ids), f"invalid skillIds for {certificate_id}")
+        require(len(skill_ids) == len(set(skill_ids)) and all(skill_id in valid_skill_ids for skill_id in skill_ids), f"invalid skillIds for {certificate_id}")
+        require(certificate.get("source") == "user-confirmed", f"certificate {certificate_id} must be user-confirmed")
+
+        confirmed_value = certificate.get("confirmedOn")
+        require(isinstance(confirmed_value, str) and re.fullmatch(r"\d{4}-\d{2}-\d{2}", confirmed_value), f"confirmedOn for {certificate_id} must use YYYY-MM-DD")
+        try:
+            confirmed_on = date.fromisoformat(confirmed_value)
+        except ValueError as error:
+            raise ValueError(f"confirmedOn for {certificate_id} must use YYYY-MM-DD") from error
+        require(confirmed_on <= updated_at, f"confirmedOn for {certificate_id} is later than catalog updatedAt")
+
+        verification_url = certificate.get("verificationUrl")
+        if verification_url is not None:
+            require(isinstance(verification_url, str) and len(verification_url) <= 2048, f"invalid verificationUrl for {certificate_id}")
+            parsed = urlparse(verification_url)
+            require(
+                parsed.scheme == "https" and bool(parsed.hostname) and not parsed.username and not parsed.password
+                and not parsed.query and not parsed.fragment,
+                f"verificationUrl for {certificate_id} must be a plain HTTPS URL without credentials, query, or fragment",
+            )
+
+        public_text = " ".join((name, issuer, summary, verification_url or ""))
+        require(not re.search(r"\d{8,}", public_text), f"possible private identifier in certificate {certificate_id}")
+        require(not sensitive_label.search(public_text), f"possible credential label in certificate {certificate_id}")
+
+        signature = (name.strip().casefold(), issuer.strip().casefold(), certificate["issuedOn"])
+        require(signature not in signatures, f"duplicate certificate record: {certificate_id}")
+        ids.add(certificate_id)
+        signatures.add(signature)
+
+
 def validate_projects(catalog: dict[str, Any]) -> None:
     require(catalog.get("schemaVersion") == 1, "project catalog schemaVersion must be 1")
     require(catalog.get("owner") == "xieyaozhong", "project catalog owner must be xieyaozhong")
@@ -209,10 +297,11 @@ def validate_assets() -> None:
             require(not path.name.startswith("."), f"unexpected hidden file in publication: {path.relative_to(SITE)}")
 
 
-def validate_public_content(profile: dict[str, Any]) -> None:
+def validate_public_content(profile: dict[str, Any], certificates: dict[str, Any]) -> None:
     forbidden_keys = re.compile(r"(^|\.)(email|phone|address|contactName|realName|token|secret|apiKey)$", re.I)
-    leaked = [key for key in walk_keys(profile) if forbidden_keys.search(key)]
-    require(not leaked, f"public profile contains sensitive keys: {', '.join(leaked)}")
+    for label, dataset in (("profile", profile), ("certificate catalog", certificates)):
+        leaked = [key for key in walk_keys(dataset) if forbidden_keys.search(key)]
+        require(not leaked, f"public {label} contains sensitive keys: {', '.join(leaked)}")
 
     for public_root in (SITE, ROOT / "config"):
         for path in public_root.rglob("*"):
@@ -235,11 +324,13 @@ def main() -> None:
     plan = json.loads((SITE / "data" / "today.json").read_text(encoding="utf-8"))
     profile = json.loads((SITE / "data" / "profile.json").read_text(encoding="utf-8"))
     projects = json.loads((SITE / "data" / "github-projects.json").read_text(encoding="utf-8"))
+    certificates = json.loads((SITE / "data" / "certificates.json").read_text(encoding="utf-8"))
     validate_profile(profile)
     validate_plan(plan, profile, expected_date)
     validate_projects(projects)
+    validate_certificates(certificates)
     validate_assets()
-    validate_public_content(profile)
+    validate_public_content(profile, certificates)
     require((SITE / "assets" / "og.png").stat().st_size > 10_000, "social preview image is missing or too small")
     print("Site validation passed")
 

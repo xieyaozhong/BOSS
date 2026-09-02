@@ -13,6 +13,9 @@ const state = {
   projectMeta: null,
   projectFilter: "all",
   projectsLoading: true,
+  certificates: [],
+  certificateMeta: null,
+  certificatesLoading: true,
   plan: null,
   activity: [],
   timerStartedAt: null,
@@ -230,6 +233,57 @@ function isValidProjects(data) {
   );
 }
 
+function isValidMonth(value) {
+  return typeof value === "string" && /^\d{4}-(0[1-9]|1[0-2])$/.test(value) && !Number.isNaN(Date.parse(`${value}-01T00:00:00Z`));
+}
+
+function isValidDay(value) {
+  if (typeof value !== "string" || !/^\d{4}-(0[1-9]|1[0-2])-([0-2]\d|3[01])$/.test(value)) return false;
+  const parsed = new Date(`${value}T00:00:00Z`);
+  return !Number.isNaN(parsed.valueOf()) && parsed.toISOString().slice(0, 10) === value;
+}
+
+function isSafeCertificateUrl(value) {
+  if (value === null) return true;
+  if (typeof value !== "string" || value.length > 2048) return false;
+  try {
+    const url = new URL(value);
+    return url.protocol === "https:" && Boolean(url.hostname) && !url.username && !url.password && !url.search && !url.hash;
+  } catch {
+    return false;
+  }
+}
+
+function isValidCertificates(data) {
+  if (!data || data.schemaVersion !== 1 || !Array.isArray(data.certifications)) return false;
+  if (!Number.isInteger(data.total) || data.total < 0 || data.total !== data.certifications.length || typeof data.updatedAt !== "string" || Number.isNaN(Date.parse(data.updatedAt))) return false;
+  const allowedKeys = new Set(["id", "name", "issuer", "issuedOn", "expiresOn", "doesNotExpire", "summary", "skillIds", "verificationUrl", "source", "confirmedOn"]);
+  const ids = new Set();
+  const signatures = new Set();
+
+  for (const certificate of data.certifications) {
+    if (!certificate || Object.keys(certificate).length !== allowedKeys.size || !Object.keys(certificate).every((key) => allowedKeys.has(key))) return false;
+    if (typeof certificate.id !== "string" || !/^[a-z0-9][a-z0-9-]{1,63}$/.test(certificate.id) || ids.has(certificate.id)) return false;
+    if (typeof certificate.name !== "string" || certificate.name.trim().length < 2 || certificate.name.length > 120) return false;
+    if (typeof certificate.issuer !== "string" || certificate.issuer.trim().length < 2 || certificate.issuer.length > 120) return false;
+    if (typeof certificate.summary !== "string" || certificate.summary.trim().length < 8 || certificate.summary.length > 200) return false;
+    if (!isValidMonth(certificate.issuedOn) || !(certificate.expiresOn === null || isValidMonth(certificate.expiresOn))) return false;
+    if (typeof certificate.doesNotExpire !== "boolean" || (certificate.doesNotExpire && certificate.expiresOn !== null)) return false;
+    if (certificate.expiresOn && certificate.expiresOn < certificate.issuedOn) return false;
+    if (!Array.isArray(certificate.skillIds) || certificate.skillIds.length === 0 || certificate.skillIds.length > EXPECTED_SKILL_IDS.length) return false;
+    if (new Set(certificate.skillIds).size !== certificate.skillIds.length || !certificate.skillIds.every((id) => EXPECTED_SKILL_IDS.includes(id))) return false;
+    if (!isSafeCertificateUrl(certificate.verificationUrl) || certificate.source !== "user-confirmed") return false;
+    if (!isValidDay(certificate.confirmedOn)) return false;
+    if (certificate.confirmedOn > data.updatedAt.slice(0, 10)) return false;
+    if ([certificate.name, certificate.issuer, certificate.summary, certificate.verificationUrl || ""].some((value) => /\d{8,}/.test(value))) return false;
+    const signature = `${certificate.name.trim().toLocaleLowerCase()}|${certificate.issuer.trim().toLocaleLowerCase()}|${certificate.issuedOn}`;
+    if (signatures.has(signature)) return false;
+    ids.add(certificate.id);
+    signatures.add(signature);
+  }
+  return true;
+}
+
 async function loadProjectsData() {
   try {
     const response = await fetch("./data/github-projects.json", { cache: "no-store" });
@@ -243,6 +297,22 @@ async function loadProjectsData() {
     state.projectMeta = null;
   } finally {
     state.projectsLoading = false;
+  }
+}
+
+async function loadCertificatesData() {
+  try {
+    const response = await fetch("./data/certificates.json", { cache: "no-store" });
+    if (!response.ok) return;
+    const certificates = await response.json();
+    if (!isValidCertificates(certificates)) return;
+    state.certificates = certificates.certifications;
+    state.certificateMeta = certificates;
+  } catch {
+    state.certificates = [];
+    state.certificateMeta = null;
+  } finally {
+    state.certificatesLoading = false;
   }
 }
 
@@ -407,6 +477,7 @@ function renderAll() {
   renderPlan();
   renderSkills();
   renderProjects();
+  renderCertificates();
   renderProfileForm();
   renderWeek();
   renderOutputs();
@@ -622,6 +693,113 @@ function renderProjects() {
   if (!filterData.some((category) => category.id === state.projectFilter)) state.projectFilter = "all";
   applyProjectFilter(state.projectFilter);
   grid.setAttribute("aria-busy", "false");
+}
+
+function certificateMonthLabel(value) {
+  return value ? value.replace("-", ".") : "日期未標示";
+}
+
+function certificateStatus(certificate) {
+  if (certificate.doesNotExpire) return { label: "永久有效", tone: "active" };
+  if (!certificate.expiresOn) return { label: "未標示到期日", tone: "unknown" };
+  const currentMonth = taipeiDateKey().slice(0, 7);
+  return certificate.expiresOn < currentMonth
+    ? { label: `已到期 ${certificateMonthLabel(certificate.expiresOn)}`, tone: "expired" }
+    : { label: `有效至 ${certificateMonthLabel(certificate.expiresOn)}`, tone: "active" };
+}
+
+function renderCertificates() {
+  const grid = $("#certificate-grid");
+  const empty = $("#certificate-empty");
+  const summary = $("#certificate-summary");
+  grid.setAttribute("aria-busy", "true");
+
+  if (state.certificatesLoading) {
+    grid.replaceChildren();
+    empty.classList.add("hidden");
+    summary.textContent = "正在讀取本人確認資料…";
+    return;
+  }
+
+  if (!state.certificateMeta) {
+    grid.replaceChildren();
+    grid.setAttribute("aria-busy", "false");
+    $("#certificate-empty-kicker").textContent = "LOAD ERROR";
+    $("#certificate-empty-title").textContent = "證照資料暫時無法載入";
+    $("#certificate-empty-copy").textContent = "網站其他功能仍可使用；請稍後重新整理頁面。";
+    empty.classList.remove("hidden");
+    summary.textContent = "證照資料暫時無法載入";
+    return;
+  }
+
+  if (state.certificates.length === 0) {
+    grid.replaceChildren();
+    grid.setAttribute("aria-busy", "false");
+    $("#certificate-empty-kicker").textContent = "CERTIFICATES / 0";
+    $("#certificate-empty-title").textContent = "尚未加入公開證照";
+    $("#certificate-empty-copy").textContent = "目前沒有可公開確認的證照資料。有實際證照後，再加入正式名稱、發證單位與取得日期。";
+    empty.classList.remove("hidden");
+    summary.textContent = "0 張公開證照 · 等待本人提供資料";
+    return;
+  }
+
+  empty.classList.add("hidden");
+  const cards = state.certificates.map((certificate, index) => {
+    const item = make("li", "certificate-list-item");
+    const card = make("article", "certificate-card");
+    const relatedSkills = certificate.skillIds
+      .map((id) => state.profile.skills.find((skill) => skill.id === id))
+      .filter(Boolean);
+    card.style.setProperty("--certificate-accent", relatedSkills[0]?.color || "#b9a4ff");
+
+    const top = make("div", "certificate-card-top");
+    const seal = make("span", "certificate-seal", "證");
+    seal.setAttribute("aria-hidden", "true");
+    const badges = make("div", "certificate-badges");
+    badges.append(make("span", "certificate-confirmed", "本人確認"));
+    const status = certificateStatus(certificate);
+    const statusBadge = make("span", "certificate-status", status.label);
+    statusBadge.dataset.tone = status.tone;
+    badges.append(statusBadge);
+    top.append(seal, badges);
+
+    const number = make("span", "certificate-number", String(index + 1).padStart(2, "0"));
+    number.setAttribute("aria-hidden", "true");
+    const title = make("h3", "", certificate.name);
+    const issuer = make("p", "certificate-issuer", certificate.issuer);
+    const proofLabel = make("span", "certificate-proof-label", "證明範圍");
+    const proof = make("p", "certificate-proof", certificate.summary);
+    card.append(top, number, title, issuer, proofLabel, proof);
+
+    const meta = make("div", "certificate-meta");
+    const issued = make("span");
+    const issuedTime = make("time", "", certificateMonthLabel(certificate.issuedOn));
+    issuedTime.dateTime = certificate.issuedOn;
+    issued.append("取得 ", issuedTime);
+    meta.append(issued);
+    if (relatedSkills.length) meta.append(make("span", "", `關聯能力 ${relatedSkills.map((skill) => skill.name).join("・")}`));
+    const confirmed = make("time", "", `資料確認 ${certificate.confirmedOn.replaceAll("-", ".")}`);
+    confirmed.dateTime = certificate.confirmedOn;
+    meta.append(confirmed);
+
+    const actions = make("div", "certificate-actions");
+    if (certificate.verificationUrl) {
+      const link = make("a", "certificate-link", "公開查驗 ↗");
+      link.href = certificate.verificationUrl;
+      link.target = "_blank";
+      link.rel = "noreferrer";
+      link.setAttribute("aria-label", `開啟 ${certificate.name} 的公開查驗資料，新分頁開啟`);
+      actions.append(link);
+    } else {
+      actions.append(make("span", "certificate-no-link", "尚未提供公開查驗連結"));
+    }
+    card.append(meta, actions);
+    item.append(card);
+    return item;
+  });
+  grid.replaceChildren(...cards);
+  grid.setAttribute("aria-busy", "false");
+  summary.textContent = `${state.certificates.length} 張公開證照 · ${projectDateLabel(state.certificateMeta.updatedAt)} 更新`;
 }
 
 function renderProfileForm() {
@@ -1062,6 +1240,7 @@ async function init() {
       renderSkills();
       renderProjects();
     });
+    loadCertificatesData().then(renderCertificates);
     setInterval(checkDateRollover, 60000);
     document.addEventListener("visibilitychange", () => {
       if (document.visibilityState === "visible") checkDateRollover();
