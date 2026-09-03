@@ -1,0 +1,120 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <meta name="theme-color" content="#20231f" />
+  <title>BOSS Music Composer｜譜＋音樂創作工作台</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/abcjs@6.7.0/abcjs-audio.css" />
+  <style>
+    :root{--ink:#20231f;--paper:#f3efe6;--white:#fffdf8;--acid:#d8ef4b;--blue:#8fb6ff;--peach:#ff9c74;--line:rgba(32,35,31,.18);--muted:#696c65;--mono:SFMono-Regular,Consolas,monospace;--sans:Inter,"Noto Sans TC","PingFang TC","Microsoft JhengHei",system-ui,sans-serif}
+    *{box-sizing:border-box}body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--sans)}a{color:inherit}.wrap{max-width:1400px;margin:auto;padding:24px}.top{display:flex;justify-content:space-between;gap:20px;align-items:center;padding:8px 0 24px}.brand{font:800 18px var(--mono);text-decoration:none}.back{font:700 12px var(--mono);text-decoration:none;border-bottom:1px solid}.hero{display:grid;grid-template-columns:1.2fr .8fr;gap:24px;padding:44px 0;border-top:1px solid var(--line);border-bottom:1px solid var(--line)}.eyebrow{font:700 11px var(--mono);letter-spacing:.08em}.hero h1{font-size:clamp(42px,7vw,92px);line-height:.92;margin:10px 0 18px;letter-spacing:-.055em}.hero p{max-width:700px;line-height:1.7}.hero-note{background:var(--ink);color:var(--white);border-radius:24px;padding:24px;display:flex;flex-direction:column;justify-content:space-between}.hero-note strong{font-size:28px}.hero-note small{opacity:.65;line-height:1.6}.studio{display:grid;grid-template-columns:minmax(300px,.7fr) minmax(0,1.3fr);gap:18px;margin:24px 0}.panel{background:rgba(255,253,248,.72);border:1px solid var(--line);border-radius:22px;padding:20px}.panel h2{margin:0 0 6px;font-size:24px}.panel>p{color:var(--muted);font-size:13px;line-height:1.6}.controls{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:18px 0}.field{display:grid;gap:6px;font:700 10px var(--mono);letter-spacing:.04em}.field select,.field input,.abc-editor{width:100%;border:1px solid var(--line);background:var(--white);border-radius:12px;padding:11px 12px;font:inherit;color:var(--ink)}.field input[type=range]{padding:0}.actions{display:flex;flex-wrap:wrap;gap:8px}.btn{appearance:none;border:1px solid var(--ink);background:transparent;color:var(--ink);border-radius:999px;padding:11px 14px;font:800 11px var(--mono);cursor:pointer}.btn.primary{background:var(--ink);color:var(--white)}.btn.acid{background:var(--acid);border-color:transparent}.btn:hover{transform:translateY(-1px)}.abc-editor{min-height:240px;resize:vertical;font:12px/1.55 var(--mono);margin-top:14px}.score-wrap{overflow:auto;background:var(--white);border-radius:18px;border:1px solid var(--line);padding:14px;min-height:340px}.audio{margin-top:12px}.meta{display:flex;gap:8px;flex-wrap:wrap;margin:12px 0}.tag{font:700 10px var(--mono);padding:6px 8px;border-radius:8px;border:1px solid var(--line)}.status{font:700 11px var(--mono);margin-top:10px;min-height:18px;color:var(--muted)}.opensource{margin:24px 0;padding:20px;border-top:1px solid var(--line);display:grid;grid-template-columns:.5fr 1.5fr;gap:20px}.opensource h3{margin:0}.opensource p{margin:0;color:var(--muted);line-height:1.7}.opensource a{font-weight:800}.abcjs-inline-audio{height:auto!important}.abcjs-btn{color:#000!important}.abcjs-midi-loop.abcjs-pushed{border:2px solid var(--ink)!important}.abcjs-highlight{fill:var(--peach)!important}.abcjs-cursor{stroke:var(--ink)!important}
+    @media(max-width:900px){.hero,.studio,.opensource{grid-template-columns:1fr}.hero-note{min-height:190px}.controls{grid-template-columns:1fr 1fr}}@media(max-width:560px){.wrap{padding:16px}.controls{grid-template-columns:1fr}.hero{padding:28px 0}.panel{padding:15px}.hero h1{font-size:48px}}
+  </style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top"><a class="brand" href="./">BOSS / MUSIC LAB</a><a class="back" href="./#music">← 回音樂區</a></header>
+  <section class="hero">
+    <div><div class="eyebrow">COMPOSE · SCORE · PLAY</div><h1>寫一段音樂，<br>同時長出樂譜。</h1><p>選擇調性、情緒、速度與小節數，系統會產生可編輯的 ABC 樂譜資料；同一份資料即時渲染五線譜、合成播放，並可匯出 MIDI 繼續到 DAW 或編曲軟體加工。</p></div>
+    <aside class="hero-note"><span class="eyebrow">NO API CREDIT</span><strong>100% 瀏覽器端</strong><small>核心採用開源 abcjs。生成邏輯、譜面與播放都在你的瀏覽器完成；播放音色會從公開 soundfont 載入。</small></aside>
+  </section>
+
+  <main class="studio">
+    <section class="panel">
+      <h2>創作設定</h2><p>先讓系統給你一個可修改的草稿，再直接改下面的 ABC 內容。</p>
+      <div class="controls">
+        <label class="field">情緒<select id="mood"><option value="bright">明亮 / POP</option><option value="lyrical">抒情 / BALLAD</option><option value="mysterious">神秘 / AMBIENT</option><option value="cinematic">電影感 / CINEMATIC</option></select></label>
+        <label class="field">調性<select id="key"><option>C</option><option>G</option><option>D</option><option>F</option><option>Am</option><option>Em</option></select></label>
+        <label class="field">小節<select id="bars"><option value="4">4 bars</option><option value="8" selected>8 bars</option><option value="16">16 bars</option></select></label>
+        <label class="field">音色<select id="instrument"><option value="0">Piano</option><option value="40">Violin</option><option value="24">Acoustic Guitar</option><option value="48">Strings</option><option value="73">Flute</option></select></label>
+        <label class="field" style="grid-column:1/-1">速度 <span id="tempoLabel">96 BPM</span><input id="tempo" type="range" min="55" max="160" value="96" /></label>
+      </div>
+      <div class="actions"><button class="btn primary" id="generate">生成譜＋音樂</button><button class="btn acid" id="variation">再來一版</button><button class="btn" id="update">套用手動修改</button></div>
+      <textarea id="abc" class="abc-editor" spellcheck="false" aria-label="ABC 樂譜編輯器"></textarea>
+      <div class="actions"><button class="btn" id="downloadABC">下載 .abc</button><button class="btn" id="downloadMIDI">下載 MIDI</button></div>
+      <div id="status" class="status" aria-live="polite"></div>
+    </section>
+
+    <section class="panel">
+      <h2>即時樂譜＋播放</h2><p>每次生成或修改都使用同一份音樂資料，因此譜面與聲音會保持同步。</p>
+      <div class="meta"><span class="tag" id="metaKey">KEY C</span><span class="tag" id="metaTempo">96 BPM</span><span class="tag" id="metaBars">8 BARS</span><span class="tag">ABCJS 6.7</span></div>
+      <div id="paper" class="score-wrap"></div>
+      <div id="audio" class="audio"></div>
+    </section>
+  </main>
+
+  <section class="opensource"><h3>開源核心</h3><p><a href="https://github.com/paulrosen/abcjs" target="_blank" rel="noreferrer">paulrosen/abcjs ↗</a> — MIT License。它可在瀏覽器把 ABC 文字轉成標準樂譜，並使用同一份音樂資料進行合成播放與 MIDI 產生；BOSS 在其上加入「情緒 × 調性 × 和弦進行 × 旋律變奏」生成器。</p></section>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/abcjs@6.7.0/dist/abcjs-basic-min.js"></script>
+<script>
+(() => {
+  const $ = id => document.getElementById(id);
+  const scales = {
+    C:{abc:['C','D','E','F','G','A','B','c'], chords:['C','G','Am','F'], key:'C'},
+    G:{abc:['G','A','B','c','d','e','^f','g'], chords:['G','D','Em','C'], key:'G'},
+    D:{abc:['D','E','^F','G','A','B','^c','d'], chords:['D','A','Bm','G'], key:'D'},
+    F:{abc:['F','G','A','_B','c','d','e','f'], chords:['F','C','Dm','Bb'], key:'F'},
+    Am:{abc:['A','B','c','d','e','f','g','a'], chords:['Am','F','C','G'], key:'Am'},
+    Em:{abc:['E','^F','G','A','B','c','d','e'], chords:['Em','C','G','D'], key:'Em'}
+  };
+  const moodMap = {
+    bright:{weights:[0,2,4,5,7,4,2,0], step:3},
+    lyrical:{weights:[0,2,4,2,5,4,2,1], step:2},
+    mysterious:{weights:[0,1,5,3,6,1,4,0], step:4},
+    cinematic:{weights:[0,4,5,2,6,4,1,0], step:3}
+  };
+  let visual = null;
+  let synthControl = null;
+  let seed = Date.now() % 99991;
+  function rnd(){ seed=(seed*9301+49297)%233280; return seed/233280; }
+  function pick(arr){return arr[Math.floor(rnd()*arr.length)]}
+  function makeBar(scale,mood,barIndex,chord){
+    const guide=moodMap[mood].weights;
+    const chordDegrees = [0,2,4];
+    const notes=[];
+    const pattern = mood==='lyrical' ? [2,2,2,2] : mood==='mysterious' ? [2,1,1,2,2] : [1,1,1,1,1,1,1,1];
+    pattern.forEach((dur,i)=>{
+      let degree;
+      if(i===0 || i===pattern.length-1) degree = chordDegrees[(barIndex+i)%chordDegrees.length];
+      else if(rnd()<.52) degree=pick(chordDegrees); else degree=pick(guide);
+      degree=Math.max(0,Math.min(7,degree));
+      const rest = mood==='mysterious' && i>0 && rnd()<.12;
+      notes.push((rest?'z':scale.abc[degree]) + (dur>1?dur:''));
+    });
+    return `"${chord}"${notes.join(' ')}`;
+  }
+  function compose(){
+    const k=$('key').value, bars=+$('bars').value, bpm=+$('tempo').value, mood=$('mood').value, program=+$('instrument').value;
+    const scale=scales[k]; const body=[];
+    for(let i=0;i<bars;i++) body.push(makeBar(scale,mood,i,scale.chords[i%4]));
+    if(body.length) body[body.length-1]=`"${scale.chords[0]}"${scale.abc[0]}8`;
+    const title={bright:'Bright Sketch',lyrical:'Lyrical Sketch',mysterious:'Midnight Sketch',cinematic:'Cinematic Sketch'}[mood];
+    $('abc').value=`X:1\nT:${title}\nC:BOSS Music Lab\nM:4/4\nL:1/8\nQ:1/4=${bpm}\n%%MIDI program ${program}\nK:${scale.key}\n| ${body.join(' | ')} |]`;
+    render();
+  }
+  function render(){
+    const abc=$('abc').value;
+    try{
+      visual=ABCJS.renderAbc('paper',abc,{responsive:'resize',add_classes:true,staffwidth:760});
+      if(!visual.length) throw new Error('無法解析樂譜');
+      if(ABCJS.synth.supportsAudio()){
+        if(!synthControl){synthControl=new ABCJS.synth.SynthController();synthControl.load('#audio',null,{displayLoop:true,displayRestart:true,displayPlay:true,displayProgress:true,displayWarp:true});}
+        synthControl.setTune(visual[0],false,{chordsOff:false}).catch(()=>{});
+      } else $('audio').textContent='此瀏覽器不支援 Web Audio 播放。';
+      $('metaKey').textContent=`KEY ${$('key').value}`;$('metaTempo').textContent=`${$('tempo').value} BPM`;$('metaBars').textContent=`${$('bars').value} BARS`;
+      $('status').textContent='樂譜已同步；按播放鍵會載入所需音色。';
+    }catch(err){$('status').textContent='ABC 格式有誤：'+err.message;}
+  }
+  function download(name,blob){const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=name;document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove()},0)}
+  $('tempo').addEventListener('input',e=>$('tempoLabel').textContent=e.target.value+' BPM');
+  $('generate').addEventListener('click',()=>{seed=Date.now()%99991;compose()});
+  $('variation').addEventListener('click',()=>{seed=(seed+7919)%99991;compose()});
+  $('update').addEventListener('click',render);
+  $('downloadABC').addEventListener('click',()=>download('boss-composition.abc',new Blob([$('abc').value],{type:'text/plain;charset=utf-8'})));
+  $('downloadMIDI').addEventListener('click',()=>{try{const data=ABCJS.synth.getMidiFile($('abc').value,{midiOutputType:'encoded'});const a=document.createElement('a');a.href=data;a.download='boss-composition.mid';document.body.appendChild(a);a.click();a.remove();$('status').textContent='MIDI 已產生。';}catch(e){$('status').textContent='MIDI 產生失敗：'+e.message}});
+  compose();
+})();
+</script>
+</body>
+</html>

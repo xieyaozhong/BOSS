@@ -1,8 +1,8 @@
 {
   "schemaVersion": 1,
-  "updatedAt": "2026-09-02T17:14:10+08:00",
+  "updatedAt": "2026-09-03T17:40:00+08:00",
   "instrumentCount": 3,
-  "itemCount": 0,
+  "itemCount": 3,
   "instruments": [
     {
       "id": "violin",
@@ -13,7 +13,16 @@
       "sections": {
         "scores": [],
         "theory": [],
-        "works": []
+        "works": [
+          {
+            "id": "violin-boss-composer",
+            "title": "BOSS 音樂創作工作台｜譜＋音樂",
+            "summary": "從情緒、調性、速度與小節數產生旋律草稿，同步生成五線譜、瀏覽器播放與 MIDI。",
+            "url": "https://xieyaozhong.github.io/BOSS/composer.html",
+            "source": "user-confirmed",
+            "rights": {"basis":"creator-owned","license":null,"sourceUrl":null,"attribution":null}
+          }
+        ]
       }
     },
     {
@@ -25,7 +34,16 @@
       "sections": {
         "scores": [],
         "theory": [],
-        "works": []
+        "works": [
+          {
+            "id": "guitar-boss-composer",
+            "title": "BOSS 音樂創作工作台｜譜＋音樂",
+            "summary": "從情緒、調性、速度與小節數產生旋律草稿，同步生成五線譜、瀏覽器播放與 MIDI。",
+            "url": "https://xieyaozhong.github.io/BOSS/composer.html",
+            "source": "user-confirmed",
+            "rights": {"basis":"creator-owned","license":null,"sourceUrl":null,"attribution":null}
+          }
+        ]
       }
     },
     {
@@ -37,7 +55,16 @@
       "sections": {
         "scores": [],
         "theory": [],
-        "works": []
+        "works": [
+          {
+            "id": "piano-boss-composer",
+            "title": "BOSS 音樂創作工作台｜譜＋音樂",
+            "summary": "從情緒、調性、速度與小節數產生旋律草稿，同步生成五線譜、瀏覽器播放與 MIDI。",
+            "url": "https://xieyaozhong.github.io/BOSS/composer.html",
+            "source": "user-confirmed",
+            "rights": {"basis":"creator-owned","license":null,"sourceUrl":null,"attribution":null}
+          }
+        ]
       }
     }
   ]
