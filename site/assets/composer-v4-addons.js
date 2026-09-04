@@ -47,3 +47,12 @@
   document.querySelectorAll('[data-example]').forEach(b=>b.addEventListener('click',()=>applyExample(b.dataset.example)));
   $('loadStream')?.addEventListener('click',loadReferenceStream); $('clearStream')?.addEventListener('click',clearReferenceStream); $('streamUrl')?.addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();loadReferenceStream();}});
 })();
+
+(() => {
+  if (window.__bossV6Loader) return;
+  window.__bossV6Loader = true;
+  const script = document.createElement('script');
+  script.src = './assets/composer-v6-transcription.js';
+  script.defer = true;
+  document.body.appendChild(script);
+})();
