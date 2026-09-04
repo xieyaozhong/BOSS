@@ -4,9 +4,10 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <meta name="theme-color" content="#20231f" />
-  <title>BOSS Ensemble Composer｜多樂器編曲＋自動轉譜</title>
+  <title>BOSS Ensemble Composer｜多樂器編曲＋串流參考＋自動轉譜</title>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/abcjs@6.7.0/abcjs-audio.css" />
   <link rel="stylesheet" href="./assets/composer-v3.css" />
+  <link rel="stylesheet" href="./assets/composer-v4-addons.css" />
 </head>
 <body>
 <div class="wrap">
@@ -14,14 +15,14 @@
 
   <section class="hero">
     <div>
-      <div class="eyebrow">ARRANGE · EDIT SCORE · TRANSCRIBE AUDIO</div>
+      <div class="eyebrow">ARRANGE · STREAM REFERENCE · EDIT SCORE · TRANSCRIBE AUDIO</div>
       <h1>指定樂器，<br>直接把聲音變成譜。</h1>
-      <p>每一軌都可以指定自己的樂器與音色、直接手動編輯 ABC 樂譜，再把 MP3 / WAV / OGG / M4A 等音訊匯入，轉成可繼續修改的五線譜。所有軌道最後仍能一起合奏、匯出 ABC 與 MIDI。</p>
+      <p>每一軌都可以指定自己的樂器與音色、直接手動編輯 ABC 樂譜；也能貼入 YouTube / YouTube Music / Apple Music 當參考音源，或把你有權處理的 MP3 / WAV / OGG / M4A 音檔轉成可繼續修改的五線譜。</p>
     </div>
     <aside class="hero-note">
       <div><span class="eyebrow">LOCAL-FIRST MUSIC WORKFLOW</span><strong>音檔留在你的瀏覽器</strong></div>
       <small>快速模式使用瀏覽器端音高偵測抓主旋律；AI 多音高模式使用 Spotify Basic Pitch 模型，適合單一樂器或較乾淨的音軌。完整歌曲、鼓組與混音會需要人工校正。</small>
-      <div class="pillrow"><span class="pill">MULTI TRACK</span><span class="pill">MANUAL ABC</span><span class="pill">AUDIO → SCORE</span><span class="pill">MIDI EXPORT</span></div>
+      <div class="pillrow"><span class="pill">MULTI TRACK</span><span class="pill">MANUAL ABC</span><span class="pill">STREAM REFERENCE</span><span class="pill">AUDIO → SCORE</span><span class="pill">MIDI EXPORT</span></div>
     </aside>
   </section>
 
@@ -46,12 +47,42 @@
         <button class="preset" type="button" data-preset="woodwind">木管合奏</button>
       </div>
 
+      <div class="section-head"><h3>原創生成範例</h3><span>12 ORIGINAL STARTERS</span></div>
+      <div class="example-grid" id="exampleGrid">
+        <button class="example-card" type="button" data-example="citypop"><strong>City Pop 夜行</strong><small>明亮切分、電鋼琴與 Bass 的都會感。</small><span class="example-meta"><span>C</span><span>118 BPM</span><span>BAND</span></span></button>
+        <button class="example-card" type="button" data-example="kost"><strong>韓系 OST 慢板</strong><small>弦樂長線條＋層層推進的抒情配置。</small><span class="example-meta"><span>G</span><span>74 BPM</span><span>STRINGS</span></span></button>
+        <button class="example-card" type="button" data-example="lofi"><strong>Lo-fi 夜讀</strong><small>低速和弦循環、留白旋律與輕柔低音。</small><span class="example-meta"><span>Am</span><span>76 BPM</span><span>BAND</span></span></button>
+        <button class="example-card" type="button" data-example="hero"><strong>電影英雄主題</strong><small>銅管／弦樂式動機，適合預告與場景配樂。</small><span class="example-meta"><span>D</span><span>108 BPM</span><span>CINEMATIC</span></span></button>
+        <button class="example-card" type="button" data-example="mystic"><strong>神秘 6/8 Ambient</strong><small>三拍群組、低音持續音與空間感旋律。</small><span class="example-meta"><span>Dm</span><span>64 BPM</span><span>6/8</span></span></button>
+        <button class="example-card" type="button" data-example="woodland"><strong>森林木管晨光</strong><small>長笛、雙簧管、單簧管交替的輕盈短曲。</small><span class="example-meta"><span>F</span><span>104 BPM</span><span>WOODWIND</span></span></button>
+        <button class="example-card" type="button" data-example="waltz"><strong>室內樂圓舞曲</strong><small>3/4 拍鋼琴三重奏，旋律與低音清楚分工。</small><span class="example-meta"><span>Dm</span><span>108 BPM</span><span>3/4</span></span></button>
+        <button class="example-card" type="button" data-example="ballad"><strong>抒情鋼琴 Ballad</strong><small>主旋律清楚、和聲簡潔，方便自己續寫。</small><span class="example-meta"><span>G</span><span>72 BPM</span><span>TRIO</span></span></button>
+        <button class="example-card" type="button" data-example="jazz"><strong>Jazz Lounge</strong><small>電鋼琴式分解和弦與走動 Bass 的休閒感。</small><span class="example-meta"><span>F</span><span>96 BPM</span><span>BAND</span></span></button>
+        <button class="example-card" type="button" data-example="minimal"><strong>極簡鋼琴＋弦樂</strong><small>重複動機慢慢變化，適合工作／閱讀背景。</small><span class="example-meta"><span>C</span><span>64 BPM</span><span>TRIO</span></span></button>
+        <button class="example-card" type="button" data-example="gametown"><strong>遊戲村莊 6/8</strong><small>木管跳躍旋律，適合 RPG 小鎮與探索場景。</small><span class="example-meta"><span>C</span><span>112 BPM</span><span>6/8</span></span></button>
+        <button class="example-card" type="button" data-example="finale"><strong>暗色 Finale</strong><small>快速重複動機＋厚弦樂，適合 Boss／終章氛圍。</small><span class="example-meta"><span>Em</span><span>132 BPM</span><span>CINEMATIC</span></span></button>
+      </div>
+      <div id="exampleStatus" class="example-status" aria-live="polite">選一個範例就會直接重建編制、調性、速度、拍號與每軌譜面。</div>
+
       <div class="section-head"><h3>樂器軌道</h3><span id="trackCount">0 TRACKS</span></div>
       <div id="trackRack" class="track-rack"></div>
       <div class="actions">
         <button class="btn blue" id="addTrack" type="button">＋ 新增樂器</button>
         <button class="btn primary" id="generate" type="button">生成合奏草稿</button>
         <button class="btn acid" id="variation" type="button">再來一版</button>
+      </div>
+
+      <div class="section-head"><h3>YouTube / Apple Music 參考音源</h3><span>STREAM REFERENCE</span></div>
+      <div class="stream-box">
+        <div class="stream-entry">
+          <label class="field">貼上音樂連結<input id="streamUrl" type="url" inputmode="url" placeholder="https://www.youtube.com/watch?v=… 或 https://music.apple.com/…" /></label>
+          <button class="btn blue" id="loadStream" type="button">載入參考音源</button>
+        </div>
+        <div class="platform-badges"><span>YouTube</span><span>YouTube Music</span><span>Apple Music</span></div>
+        <div id="streamPlayer" class="stream-player"><div class="stream-placeholder">貼入 YouTube 或 Apple Music 的公開分享連結，就能在編曲器旁直接播放比對。<br>這個播放器只作參考，不會下載或抽取平台串流。</div></div>
+        <div class="stream-actions"><a class="btn hidden" id="openStream" target="_blank" rel="noreferrer">在原平台開啟</a><button class="btn hidden" id="clearStream" type="button">清除參考音源</button></div>
+        <div id="streamStatus" class="stream-status" aria-live="polite">支援常見 youtube.com / youtu.be / music.youtube.com / music.apple.com 分享連結。</div>
+        <div class="privacy"><strong>平台限制：</strong>YouTube 與 Apple Music 的串流受到平台授權、DRM 與跨網域限制，本站不會繞過限制擷取音訊。如果要自動生成譜，請在下方上傳你有權處理的音訊檔。</div>
       </div>
 
       <div class="section-head"><h3>匯入音樂 → 自動生成譜</h3><span>AUDIO TRANSCRIPTION</span></div>
@@ -106,10 +137,12 @@
 
   <section class="opensource">
     <h3>轉譜核心</h3>
-    <p><a href="https://github.com/spotify/basic-pitch-ts" target="_blank" rel="noreferrer">Spotify Basic Pitch ↗</a> 用於 AI 多音高自動轉譜；<a href="https://github.com/paulrosen/abcjs" target="_blank" rel="noreferrer">abcjs ↗</a> 用於五線譜、合成播放與 MIDI。快速轉譜則是 BOSS 自己的 Web Audio 主頻分析＋節奏量化流程。</p>
+    <p><a href="https://github.com/spotify/basic-pitch-ts" target="_blank" rel="noreferrer">Spotify Basic Pitch ↗</a> 用於 AI 多音高自動轉譜；<a href="https://github.com/paulrosen/abcjs" target="_blank" rel="noreferrer">abcjs ↗</a> 用於五線譜、合成播放與 MIDI。快速轉譜則是 BOSS 自己的 Web Audio 主頻分析＋節奏量化流程；YouTube 與 Apple Music 僅透過官方可嵌入播放器作為參考音源。</p>
   </section>
 </div>
+
 <script src="https://cdn.jsdelivr.net/npm/abcjs@6.7.0/dist/abcjs-basic-min.js"></script>
 <script src="./assets/composer-v3.js"></script>
+<script src="./assets/composer-v4-addons.js"></script>
 </body>
 </html>
